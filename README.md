@@ -190,29 +190,91 @@ meta.version = "1.0.0"
 
 ## C++ Wrapper Integration
 
-To use Julia disciplines with Philote-Cpp servers:
+The `cpp/` directory contains a complete C++ wrapper that embeds Julia disciplines in gRPC servers.
 
-1. Implement your discipline in Julia (as shown above)
-2. Build Philote-Cpp with Julia support (see Philote-Cpp documentation)
-3. Create a C++ server that wraps your Julia discipline:
+### Quick Start
+
+1. **Write your Julia discipline** (as shown above)
+
+2. **Build the C++ wrapper:**
+```bash
+cd cpp
+mkdir build && cd build
+cmake .. -DPHILOTE_CPP_DIR=../../Philote-Cpp -DBUILD_EXAMPLES=ON
+cmake --build .
+```
+
+3. **Run the example server:**
+```bash
+./bin/paraboloid_server
+```
+
+The server loads `examples/paraboloid.jl` and serves it via gRPC on `localhost:50051`.
+
+### Create Your Own Server
 
 ```cpp
-#include <philote/julia_explicit.h>
+#include "julia_explicit.h"
+#include <grpc++/grpc++.h>
 
 int main() {
+    // Wrap your Julia discipline
     philote::JuliaExplicitDiscipline discipline(
-        "path/to/discipline.jl",
+        "my_discipline.jl",
         "MyDiscipline"
     );
 
+    // Build and start gRPC server
     grpc::ServerBuilder builder;
     builder.AddListeningPort("localhost:50051",
                             grpc::InsecureServerCredentials());
     discipline.RegisterServices(builder);
 
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+    auto server = builder.BuildAndStart();
     server->Wait();
 }
+```
+
+### What the C++ Wrapper Provides
+
+The wrapper includes:
+- **JuliaRuntime**: Singleton managing Julia lifecycle
+- **JuliaMarshal**: Bidirectional C++/Julia data conversion
+- **JuliaExplicitDiscipline**: Wrapper class inheriting from `philote::ExplicitDiscipline`
+- **CMake integration**: FindJulia module and build system
+- **Example server**: Complete working example
+
+See [`cpp/README.md`](cpp/README.md) for detailed documentation.
+
+### Architecture
+
+```
+┌─────────────────────────────────────┐
+│   gRPC Client (Any Language)        │
+└────────────┬────────────────────────┘
+             │ Philote Protocol (gRPC)
+┌────────────┴────────────────────────┐
+│   C++ Server (Philote-Cpp)          │
+│   ┌─────────────────────────────┐   │
+│   │ JuliaExplicitDiscipline     │   │
+│   │ (C++ wrapper)               │   │
+│   └──────────┬──────────────────┘   │
+│              │                       │
+│   ┌──────────┴──────────────────┐   │
+│   │ Data Marshaling Layer       │   │
+│   │ (C++ ↔ Julia)               │   │
+│   └──────────┬──────────────────┘   │
+└──────────────┼──────────────────────┘
+               │ Julia C API
+┌──────────────┴──────────────────────┐
+│   Julia Runtime                     │
+│   ┌─────────────────────────────┐   │
+│   │ Your Discipline (Julia)     │   │
+│   │ - setup!()                  │   │
+│   │ - compute()                 │   │
+│   │ - compute_partials()        │   │
+│   └─────────────────────────────┘   │
+└─────────────────────────────────────┘
 ```
 
 ## Testing
