@@ -279,11 +279,47 @@ See [`cpp/README.md`](cpp/README.md) for detailed documentation.
 
 ## Testing
 
-Run tests with:
+### Julia Tests
+
+Run the Julia test suite:
 
 ```bash
-julia test/runtests.jl
+julia --project=. test/runtests.jl
 ```
+
+The Julia tests cover:
+- Metadata management
+- Explicit discipline interface
+- Paraboloid example implementation
+- Gradient accuracy (finite difference checks)
+
+### C++ Tests
+
+Build and run the C++ test suite:
+
+```bash
+cd cpp
+mkdir build && cd build
+cmake .. -DPHILOTE_CPP_DIR=../../Philote-Cpp -DBUILD_TESTS=ON
+cmake --build .
+ctest --output-on-failure
+```
+
+Or run the test executable directly:
+
+```bash
+./philote_julia_tests
+```
+
+The C++ tests cover:
+- JuliaRuntime: Initialization, module loading, exception handling
+- JuliaMarshal: Bidirectional C++/Julia data conversion
+- JuliaExplicitDiscipline: Full discipline integration testing
+
+**Note:** C++ tests require:
+- Google Test installed
+- Philote-Cpp built and available
+- Julia runtime accessible
 
 ## License
 

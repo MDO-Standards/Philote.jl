@@ -108,6 +108,38 @@ cmake --build .
 
 The server will load the Julia paraboloid discipline and start listening on `localhost:50051`.
 
+### 4. Run Tests
+
+Build with tests enabled:
+
+```bash
+cd Philote-Julia/cpp
+mkdir build && cd build
+
+cmake .. \
+    -DPHILOTE_CPP_DIR=../../Philote-Cpp \
+    -DBUILD_TESTS=ON
+
+cmake --build .
+```
+
+Run tests with CTest:
+
+```bash
+ctest --output-on-failure
+```
+
+Or run the test executable directly:
+
+```bash
+./philote_julia_tests
+```
+
+The test suite includes:
+- **JuliaRuntime tests**: Initialization, module loading, GC management, exception handling
+- **JuliaMarshal tests**: Bidirectional data conversion, round-trip tests for scalars/vectors/matrices/dictionaries
+- **JuliaExplicitDiscipline tests**: Full integration tests using the paraboloid example, gradient accuracy checks
+
 ## Usage
 
 ### 1. Create a Julia Discipline
