@@ -178,11 +178,11 @@ Each commit represents a logical, complete feature with:
 
 ### Immediate
 - [ ] Test with Philote-Cpp client
-- [ ] Add unit tests
+- [x] Add unit tests (completed!)
 - [ ] Performance benchmarking
 
 ### Short Term
-- [ ] Implicit discipline support
+- [x] Implicit discipline support (completed!)
 - [ ] Options marshaling
 - [ ] Discrete variable support
 

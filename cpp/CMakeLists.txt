@@ -50,6 +50,7 @@ add_library(PhiloteJulia STATIC
     src/julia_runtime.cpp
     src/julia_marshal.cpp
     src/julia_explicit.cpp
+    src/julia_implicit.cpp
 )
 
 target_include_directories(PhiloteJulia PUBLIC

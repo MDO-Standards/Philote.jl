@@ -8,7 +8,7 @@ The test suite is divided into two parts:
 1. **Julia tests** - Test the Julia interface and example disciplines
 2. **C++ tests** - Test the C++ wrapper components
 
-**Total Test Count:** 96 Julia tests + ~50 C++ tests = ~146 tests
+**Total Test Count:** 164 Julia tests + ~50 C++ tests = ~214 tests
 
 ## Julia Test Suite
 
@@ -33,7 +33,7 @@ julia --project=. test/runtests.jl
 Expected output:
 ```
 Test Summary:    | Pass  Total  Time
-Philote.jl Tests |   96     96  1.1s
+Philote.jl Tests |  164    164  2.1s
 ```
 
 ### Test Coverage
@@ -72,6 +72,31 @@ Philote.jl Tests |   96     96  1.1s
   - Scale factor effects on outputs and gradients
   - Offset effects on outputs (not gradients)
   - Combined scale and offset
+
+#### test_implicit_discipline.jl (24 tests)
+- Type hierarchy validation for ImplicitDiscipline
+- Setup and metadata extraction
+- Adding residuals with shapes and units
+- Computing residuals
+- Solving residuals
+- Verifying residuals are zero at solved solutions
+- Computing residual Jacobians
+- Required method enforcement
+- Default behavior for missing compute_residual_partials
+
+#### test_quadratic_implicit.jl (44 tests)
+- Type verification and setup
+- Metadata completeness for implicit disciplines
+- Solving various quadratic equations:
+  - Standard quadratics (x² - 5x + 6 = 0)
+  - Equations with negative roots
+  - Perfect squares
+  - Edge cases (linear equations when a=0)
+  - Invalid equations (negative discriminant)
+- Computing residuals at various points
+- Verifying residuals are zero at solutions
+- Computing residual partials (Jacobians)
+- Finite difference validation of analytical Jacobians
 
 ## C++ Test Suite
 

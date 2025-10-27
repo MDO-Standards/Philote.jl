@@ -10,4 +10,6 @@ using Test
     include("test_metadata.jl")
     include("test_explicit_discipline.jl")
     include("test_paraboloid.jl")
+    include("test_implicit_discipline.jl")
+    include("test_quadratic_implicit.jl")
 end

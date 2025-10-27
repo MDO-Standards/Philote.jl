@@ -112,9 +112,11 @@ function Philote.compute_partials(discipline::MyDiscipline,
 end
 ```
 
-## Example: Paraboloid Discipline
+## Examples
 
-See [`examples/paraboloid.jl`](examples/paraboloid.jl) for a complete example implementing the paraboloid function:
+### Paraboloid Discipline (Explicit)
+
+See [`examples/paraboloid.jl`](examples/paraboloid.jl) for a complete explicit discipline example implementing the paraboloid function:
 
 ```
 f(x, y) = (x - 3)² + xy + (y + 4)² - 3
@@ -124,6 +126,25 @@ Run the example:
 
 ```bash
 julia examples/paraboloid.jl
+```
+
+### Quadratic Implicit Discipline
+
+See [`examples/quadratic_implicit.jl`](examples/quadratic_implicit.jl) for a complete implicit discipline example that solves quadratic equations:
+
+```
+R(x) = ax² + bx + c = 0
+```
+
+This example demonstrates:
+- Defining residual equations
+- Solving for outputs that satisfy residuals
+- Computing residual Jacobians
+
+Run the example:
+
+```bash
+julia examples/quadratic_implicit.jl
 ```
 
 ## Discipline Types
