@@ -240,14 +240,48 @@ cmake .. -DPHILOTE_CPP_DIR=../../Philote-Cpp -DBUILD_EXAMPLES=ON
 cmake --build .
 ```
 
-3. **Run the example server:**
-```bash
-./bin/paraboloid_server
+3. **Create a YAML configuration file:**
+```yaml
+discipline:
+  kind: explicit  # or 'implicit'
+  julia_file: examples/paraboloid.jl
+  julia_type: ParaboloidDiscipline
+
+server:
+  address: localhost:50051
 ```
 
-The server loads `examples/paraboloid.jl` and serves it via gRPC on `localhost:50051`.
+4. **Run the generic server launcher:**
+```bash
+./bin/philote_julia_server ../examples/configs/paraboloid.yaml
+```
 
-### Create Your Own Server
+The server loads your Julia discipline and serves it via gRPC. No C++ code needed!
+
+### Deploy Your Own Discipline
+
+**Option 1: YAML Configuration (Recommended)**
+
+No C++ code needed - just create a config file:
+
+```yaml
+discipline:
+  kind: explicit
+  julia_file: path/to/my_discipline.jl
+  julia_type: MyDiscipline
+
+server:
+  address: localhost:50051
+```
+
+Then run:
+```bash
+./bin/philote_julia_server my_config.yaml
+```
+
+**Option 2: Custom C++ Launcher**
+
+If you need more control, you can write a C++ program:
 
 ```cpp
 #include "julia_explicit.h"

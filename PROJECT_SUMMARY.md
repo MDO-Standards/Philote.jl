@@ -73,12 +73,16 @@ Complete CMake integration:
 - Optional examples and tests
 - Install targets
 
-### 5. Example Server (`cpp/examples/paraboloid_server.cpp`)
-Production-ready example:
-- Loads Julia paraboloid discipline
-- Serves via gRPC
-- Clean error handling
-- User-friendly output
+### 5. Generic Server Launcher (`cpp/examples/philote_julia_server.cpp`)
+Production-ready YAML-based launcher:
+- Loads any Julia discipline via configuration file
+- No recompilation needed for new disciplines
+- Supports both explicit and implicit disciplines
+- Clean error handling and user-friendly output
+
+Example configurations provided:
+- `configs/paraboloid.yaml` - Explicit discipline
+- `configs/quadratic_implicit.yaml` - Implicit discipline
 
 ### 6. Documentation
 Comprehensive documentation across:

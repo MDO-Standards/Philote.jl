@@ -1,0 +1,17 @@
+# Philote Julia Server Configuration
+# Example: Paraboloid explicit discipline
+
+discipline:
+  # Type of discipline: 'explicit' or 'implicit'
+  kind: explicit
+
+  # Path to Julia file containing the discipline
+  # (relative to where you run the server from)
+  julia_file: ../../examples/paraboloid.jl
+
+  # Name of the Julia type (must match the struct name in the .jl file)
+  julia_type: ParaboloidDiscipline
+
+server:
+  # gRPC server address (host:port)
+  address: localhost:50051

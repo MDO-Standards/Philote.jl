@@ -42,6 +42,9 @@ find_package(PhiloteCpp REQUIRED
 find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 
+# Find yaml-cpp for configuration files
+find_package(yaml-cpp REQUIRED)
+
 # ============================================================================
 # PhiloteJulia Library
 # ============================================================================
@@ -51,6 +54,7 @@ add_library(PhiloteJulia STATIC
     src/julia_marshal.cpp
     src/julia_explicit.cpp
     src/julia_implicit.cpp
+    src/config.cpp
 )
 
 target_include_directories(PhiloteJulia PUBLIC
@@ -64,6 +68,7 @@ target_link_libraries(PhiloteJulia PUBLIC
     ${JULIA_LIBRARY}
     protobuf::libprotobuf
     gRPC::grpc++
+    yaml-cpp
 )
 
 # ============================================================================
