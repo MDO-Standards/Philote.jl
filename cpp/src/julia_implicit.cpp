@@ -15,7 +15,8 @@ JuliaImplicitDiscipline::JuliaImplicitDiscipline(const std::string& filepath,
       compute_residuals_fn_(nullptr),
       solve_residuals_fn_(nullptr),
       compute_residual_partials_fn_(nullptr),
-      get_metadata_fn_(nullptr) {
+      get_metadata_fn_(nullptr),
+      set_options_fn_(nullptr) {
 
     // Initialize Julia runtime
     JuliaRuntime::Instance().Initialize();
@@ -90,6 +91,12 @@ void JuliaImplicitDiscipline::LoadDiscipline() {
     get_metadata_fn_ = jl_get_function((jl_module_t*)philote_module, "get_metadata");
     if (get_metadata_fn_ == nullptr) {
         throw JuliaException("Could not find Philote.get_metadata function");
+    }
+
+    // Get set_options! function
+    set_options_fn_ = jl_get_function((jl_module_t*)philote_module, "set_options!");
+    if (set_options_fn_ == nullptr) {
+        throw JuliaException("Could not find Philote.set_options! function");
     }
 
     std::cout << "Julia implicit discipline loaded successfully" << std::endl;
@@ -334,6 +341,25 @@ void JuliaImplicitDiscipline::ComputeResidualPartials(const Variables& inputs,
     if (partials_dict != nullptr && !jl_is_nothing(partials_dict)) {
         JuliaMarshal::FromJuliaDict(partials_dict, partials);
     }
+}
+
+void JuliaImplicitDiscipline::SetOptions(
+    const std::map<std::string, std::pair<std::string, std::string>>& options) {
+
+    auto& runtime = JuliaRuntime::Instance();
+
+    // Convert options map to Julia Dict
+    jl_value_t* options_dict = JuliaMarshal::OptionsToJuliaDict(options);
+
+    JL_GC_PUSH1(&options_dict);
+
+    // Call Philote.set_options!(discipline, options_dict)
+    jl_call2(set_options_fn_, discipline_obj_, options_dict);
+    runtime.CheckException();
+
+    JL_GC_POP();
+
+    std::cout << "Options set successfully" << std::endl;
 }
 
 } // namespace philote

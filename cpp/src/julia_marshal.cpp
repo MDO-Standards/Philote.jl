@@ -324,6 +324,63 @@ void JuliaMarshal::SetDictValue(jl_value_t* dict,
 }
 
 // ============================================================================
+// Options marshaling
+// ============================================================================
+
+jl_value_t* JuliaMarshal::OptionValueToJulia(const std::string& value,
+                                             const std::string& type) {
+    if (type == "float") {
+        // Parse as double
+        double val = std::stod(value);
+        return jl_box_float64(val);
+    }
+    else if (type == "int") {
+        // Parse as int64
+        int64_t val = std::stoll(value);
+        return jl_box_int64(val);
+    }
+    else if (type == "bool") {
+        // Parse as boolean
+        bool val = (value == "true" || value == "1" || value == "True" || value == "TRUE");
+        return jl_box_bool(val);
+    }
+    else if (type == "string") {
+        // Convert to Julia string
+        return jl_cstr_to_string(value.c_str());
+    }
+    else {
+        throw JuliaException("Unknown option type: " + type);
+    }
+}
+
+jl_value_t* JuliaMarshal::OptionsToJuliaDict(
+    const std::map<std::string, std::pair<std::string, std::string>>& options) {
+
+    // Create empty Dict{String, Any}
+    jl_function_t* dict_fn = GetDictFunction();
+    jl_value_t* dict = jl_call0(dict_fn);
+    JuliaRuntime::Instance().CheckException();
+
+    // Protect from GC
+    JL_GC_PUSH1(&dict);
+
+    // Add each option to the dictionary
+    for (const auto& [name, value_type_pair] : options) {
+        const std::string& value_str = value_type_pair.first;
+        const std::string& type_str = value_type_pair.second;
+
+        // Convert value to Julia based on type
+        jl_value_t* julia_value = OptionValueToJulia(value_str, type_str);
+
+        // Add to dictionary: dict[name] = julia_value
+        SetDictValue(dict, name, julia_value);
+    }
+
+    JL_GC_POP();
+    return dict;
+}
+
+// ============================================================================
 // Cached Julia functions
 // ============================================================================
 

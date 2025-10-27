@@ -55,6 +55,10 @@ end
 Declare inputs, outputs, residuals, and partials for the quadratic solver.
 """
 function Philote.setup!(discipline::QuadraticImplicitDiscipline)
+    # Declare options
+    Philote.add_option!(discipline, "tolerance", "float")
+    Philote.add_option!(discipline, "max_iterations", "int")
+
     # Declare inputs (coefficients)
     Philote.add_input!(discipline, "a", [1], "1")
     Philote.add_input!(discipline, "b", [1], "1")
@@ -79,6 +83,20 @@ function Philote.setup!(discipline::QuadraticImplicitDiscipline)
     meta = Philote.get_metadata(discipline)
     meta.name = "QuadraticImplicitDiscipline"
     meta.version = "0.1.0"
+end
+
+"""
+    set_options!(discipline::QuadraticImplicitDiscipline, options::Dict{String, <:Any})
+
+Set configuration options for the quadratic solver.
+"""
+function Philote.set_options!(discipline::QuadraticImplicitDiscipline, options::Dict{String, <:Any})
+    if haskey(options, "tolerance")
+        discipline.tolerance = Float64(options["tolerance"])
+    end
+    if haskey(options, "max_iterations")
+        discipline.max_iterations = Int(options["max_iterations"])
+    end
 end
 
 """

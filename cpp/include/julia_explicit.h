@@ -57,6 +57,15 @@ public:
     void Compute(const Variables& inputs, Variables& outputs) override;
     void ComputePartials(const Variables& inputs, Partials& partials) override;
 
+    /**
+     * @brief Set discipline options
+     *
+     * Converts options to Julia Dict and calls Philote.set_options!()
+     *
+     * @param options Map of option name => (value string, type string)
+     */
+    void SetOptions(const std::map<std::string, std::pair<std::string, std::string>>& options);
+
 private:
     /**
      * @brief Load the Julia module and create discipline instance
@@ -89,6 +98,7 @@ private:
     jl_function_t* compute_fn_;
     jl_function_t* compute_partials_fn_;
     jl_function_t* get_metadata_fn_;
+    jl_function_t* set_options_fn_;
 };
 
 } // namespace philote

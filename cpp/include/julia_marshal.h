@@ -111,6 +111,38 @@ public:
     static std::vector<int64_t> FromJuliaVector(jl_value_t* vec);
 
     // ========================================================================
+    // Options marshaling
+    // ========================================================================
+
+    /**
+     * @brief Convert an option value to Julia value
+     *
+     * Converts a value based on its type string. Supported types:
+     * - "float": converts to Julia Float64
+     * - "int": converts to Julia Int64
+     * - "bool": converts to Julia Bool
+     * - "string": converts to Julia String
+     *
+     * @param value String representation of the value
+     * @param type Type string ("float", "int", "bool", "string")
+     * @return Julia value (jl_value_t*)
+     */
+    static jl_value_t* OptionValueToJulia(const std::string& value,
+                                         const std::string& type);
+
+    /**
+     * @brief Convert options map to Julia Dict
+     *
+     * Creates a Julia Dict{String, Any} from C++ options. The options
+     * are specified as a map of name => (value, type) pairs.
+     *
+     * @param options Map of option name => (value string, type string)
+     * @return Julia dictionary (jl_value_t*)
+     */
+    static jl_value_t* OptionsToJuliaDict(
+        const std::map<std::string, std::pair<std::string, std::string>>& options);
+
+    // ========================================================================
     // Helper functions
     // ========================================================================
 

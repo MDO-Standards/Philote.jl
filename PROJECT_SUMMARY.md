@@ -10,17 +10,28 @@ Successfully created a complete system for wrapping Julia MDO disciplines as Phi
 A clean, high-level Julia module for implementing MDO disciplines:
 
 - **Abstract Types**: `ExplicitDiscipline` and `ImplicitDiscipline`
-- **Declaration API**: `add_input!()`, `add_output!()`, `declare_partials!()`
-- **Computation Interface**: `compute()`, `compute_partials()`
-- **Metadata Management**: Automatic tracking of inputs, outputs, options, and partials
+- **Declaration API**: `add_input!()`, `add_output!()`, `add_residual!()`, `declare_partials!()`
+- **Computation Interface**: `compute()`, `compute_partials()`, `compute_residuals()`, `solve_residuals()`
+- **Options Interface**: `set_options!()` for configuration
+- **Metadata Management**: Automatic tracking of inputs, outputs, residuals, options, and partials
 
-### 2. Example Implementation (`examples/paraboloid.jl`)
-Fully functional example demonstrating:
+### 2. Example Implementations
+
+#### Paraboloid (`examples/paraboloid.jl`)
+Explicit discipline example demonstrating:
 - Discipline setup and configuration
 - Forward computation
 - Analytical gradient computation
-- Options handling
+- Options handling (scale_factor, offset)
 - Standalone testing
+
+#### Quadratic Implicit (`examples/quadratic_implicit.jl`)
+Implicit discipline example demonstrating:
+- Residual equation definition
+- Iterative solving (quadratic formula)
+- Jacobian computation
+- Options handling (tolerance, max_iterations)
+- Multiple test cases
 
 ### 3. C++ Wrapper Components (`cpp/`)
 
@@ -36,6 +47,7 @@ Bidirectional data conversion:
 - `philote::Variable` ↔ Julia `Array{Float64}`
 - `philote::Variables` ↔ Julia `Dict{String, Array{Float64}}`
 - `philote::Partials` ↔ Julia `Dict{String, Dict{String, Array{Float64}}}`
+- Type-aware options conversion (float, int, bool, string)
 - Automatic shape inference and validation
 
 #### JuliaExplicitDiscipline (`julia_explicit.h/cpp`)
@@ -44,7 +56,15 @@ Main wrapper class:
 - Loads Julia disciplines at runtime
 - Automatic metadata extraction
 - Full gRPC server capabilities
+- Options marshalling with type conversion
 - Zero additional code per discipline
+
+#### JuliaImplicitDiscipline (`julia_implicit.h/cpp`)
+Wrapper for implicit disciplines:
+- Inherits from `philote::ImplicitDiscipline`
+- Residual computation and solving
+- Jacobian computation for residuals
+- Options marshalling support
 
 ### 4. Build System (`cpp/CMakeLists.txt`)
 Complete CMake integration:
@@ -72,11 +92,14 @@ Comprehensive documentation across:
 ✅ **Hybrid Architecture**: Julia for modeling, C++ for infrastructure
 ✅ **Zero Overhead**: Minimal code needed per discipline
 ✅ **Full Philote Compatibility**: Works with any Philote client
-✅ **Automatic Metadata**: Extracts inputs, outputs, partials from Julia
+✅ **Automatic Metadata**: Extracts inputs, outputs, residuals, partials from Julia
+✅ **Implicit Discipline Support**: Full residual equation and solving capabilities
+✅ **Options Marshalling**: Type-aware configuration from C++ to Julia
 ✅ **Type Safety**: Compile-time and runtime type checking
 ✅ **GC Safety**: Proper Julia GC root management
 ✅ **Error Handling**: Clean exception propagation
 ✅ **Performance**: Efficient data marshaling
+✅ **Comprehensive Testing**: 165 Julia tests + C++ test infrastructure
 
 ## File Structure
 
@@ -91,7 +114,16 @@ Philote-Julia/
 │   └── Philote.jl           # Julia interface module
 │
 ├── examples/
-│   └── paraboloid.jl        # Example discipline
+│   ├── paraboloid.jl         # Explicit discipline example
+│   └── quadratic_implicit.jl # Implicit discipline example
+│
+├── test/
+│   ├── runtests.jl           # Main test runner (165 tests)
+│   ├── test_metadata.jl      # Metadata management tests
+│   ├── test_explicit_discipline.jl
+│   ├── test_paraboloid.jl
+│   ├── test_implicit_discipline.jl
+│   └── test_quadratic_implicit.jl
 │
 └── cpp/                      # C++ wrapper code
     ├── README.md             # C++ wrapper docs
@@ -99,13 +131,21 @@ Philote-Julia/
     │
     ├── include/
     │   ├── julia_runtime.h   # Runtime management
-    │   ├── julia_marshal.h   # Data conversion
-    │   └── julia_explicit.h  # Wrapper class
+    │   ├── julia_marshal.h   # Data conversion and options
+    │   ├── julia_explicit.h  # Explicit discipline wrapper
+    │   └── julia_implicit.h  # Implicit discipline wrapper
     │
     ├── src/
     │   ├── julia_runtime.cpp
     │   ├── julia_marshal.cpp
-    │   └── julia_explicit.cpp
+    │   ├── julia_explicit.cpp
+    │   └── julia_implicit.cpp
+    │
+    ├── test/
+    │   ├── test_main.cpp         # Test initialization
+    │   ├── test_julia_runtime.cpp
+    │   ├── test_julia_marshal.cpp
+    │   └── test_julia_explicit.cpp
     │
     ├── cmake/
     │   └── FindJulia.cmake   # Julia detection
@@ -183,7 +223,7 @@ Each commit represents a logical, complete feature with:
 
 ### Short Term
 - [x] Implicit discipline support (completed!)
-- [ ] Options marshaling
+- [x] Options marshalling (completed!)
 - [ ] Discrete variable support
 
 ### Long Term

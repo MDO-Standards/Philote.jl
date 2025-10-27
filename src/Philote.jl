@@ -10,9 +10,10 @@ to be compatible with the Philote-Cpp wrapper.
 module Philote
 
 export AbstractDiscipline, ExplicitDiscipline, ImplicitDiscipline
-export setup!, compute, compute_partials
-export add_input!, add_output!, add_option!, declare_partials!
+export setup!, set_options!, compute, compute_partials
+export add_input!, add_output!, add_option!, declare_partials!, add_residual!
 export get_metadata
+export compute_residuals, solve_residuals, compute_residual_partials
 
 """
     AbstractDiscipline
@@ -173,6 +174,36 @@ end
 """
 function setup!(discipline::AbstractDiscipline)
     error("setup! must be implemented for $(typeof(discipline))")
+end
+
+"""
+    set_options!(discipline::AbstractDiscipline, options::Dict{String, <:Any})
+
+Set configuration options for the discipline.
+
+This method can be optionally implemented by discipline subtypes to handle
+runtime configuration. The options dictionary maps option names to values
+of various types (Float64, Int64, Bool, String).
+
+# Arguments
+- `discipline`: The discipline instance
+- `options`: Dictionary of option name => value pairs
+
+# Example
+```julia
+function set_options!(d::MyDiscipline, options::Dict{String, <:Any})
+    if haskey(options, "tolerance")
+        d.tolerance = Float64(options["tolerance"])
+    end
+    if haskey(options, "max_iter")
+        d.max_iter = Int(options["max_iter"])
+    end
+end
+```
+"""
+function set_options!(discipline::AbstractDiscipline, options::Dict{String, <:Any})
+    # Default: do nothing
+    # Disciplines can override this to handle their specific options
 end
 
 """

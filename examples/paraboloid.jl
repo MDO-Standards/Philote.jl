@@ -113,7 +113,7 @@ end
 
 Set discipline options from a dictionary.
 """
-function set_options!(discipline::ParaboloidDiscipline, options::Dict{String, <:Any})
+function Philote.set_options!(discipline::ParaboloidDiscipline, options::Dict{String, <:Any})
     if haskey(options, "scale_factor")
         discipline.scale_factor = Float64(options["scale_factor"])
     end
@@ -168,7 +168,7 @@ if abspath(PROGRAM_FILE) == @__FILE__
     println("Test with Options")
     println("=" ^ 50)
 
-    set_options!(discipline, Dict("scale_factor" => 2.0, "offset" => 10.0))
+    Philote.set_options!(discipline, Dict("scale_factor" => 2.0, "offset" => 10.0))
     println("Options: scale_factor=$(discipline.scale_factor), offset=$(discipline.offset)")
 
     outputs = Philote.compute(discipline, inputs)

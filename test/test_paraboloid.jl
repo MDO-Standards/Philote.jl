@@ -174,7 +174,7 @@ include(joinpath(@__DIR__, "..", "examples", "paraboloid.jl"))
         f_default = outputs_default["f_xy"][1]
 
         # With scale factor = 2.0
-        set_options!(d, Dict("scale_factor" => 2.0))
+        Philote.set_options!(d, Dict("scale_factor" => 2.0))
         @test d.scale_factor == 2.0
 
         outputs_scaled = Philote.compute(d, inputs)
@@ -185,7 +185,7 @@ include(joinpath(@__DIR__, "..", "examples", "paraboloid.jl"))
         # Gradients should also scale
         partials_default = Philote.compute_partials(ParaboloidDiscipline(), inputs)
         d2 = ParaboloidDiscipline()
-        set_options!(d2, Dict("scale_factor" => 2.0))
+        Philote.set_options!(d2, Dict("scale_factor" => 2.0))
         partials_scaled = Philote.compute_partials(d2, inputs)
 
         @test partials_scaled["f_xy"]["x"][1] ≈ 2.0 * partials_default["f_xy"]["x"][1]
@@ -195,7 +195,7 @@ include(joinpath(@__DIR__, "..", "examples", "paraboloid.jl"))
     @testset "Options - Offset" begin
         d = ParaboloidDiscipline()
         Philote.setup!(d)
-        set_options!(d, Dict("offset" => 10.0))
+        Philote.set_options!(d, Dict("offset" => 10.0))
 
         @test d.offset == 10.0
 
@@ -223,7 +223,7 @@ include(joinpath(@__DIR__, "..", "examples", "paraboloid.jl"))
     @testset "Options - Combined" begin
         d = ParaboloidDiscipline()
         Philote.setup!(d)
-        set_options!(d, Dict("scale_factor" => 3.0, "offset" => 5.0))
+        Philote.set_options!(d, Dict("scale_factor" => 3.0, "offset" => 5.0))
 
         inputs = Dict("x" => [0.0], "y" => [0.0])
         outputs = Philote.compute(d, inputs)

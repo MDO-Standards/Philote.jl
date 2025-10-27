@@ -92,7 +92,20 @@ function Philote.compute(discipline::MyDiscipline,
 end
 ```
 
-### 4. Implement `compute_partials` (Optional)
+### 4. Implement `set_options!` (Optional)
+
+Handle configuration options:
+
+```julia
+function Philote.set_options!(discipline::MyDiscipline,
+                              options::Dict{String, <:Any})
+    if haskey(options, "scale_factor")
+        discipline.scale_factor = Float64(options["scale_factor"])
+    end
+end
+```
+
+### 5. Implement `compute_partials` (Optional)
 
 Provide analytical gradients:
 
@@ -158,6 +171,7 @@ For analyses of the form `outputs = f(inputs)`.
 - `compute(discipline, inputs)`
 
 **Optional methods:**
+- `set_options!(discipline, options)`
 - `compute_partials(discipline, inputs)`
 
 ### Implicit Disciplines
@@ -170,6 +184,7 @@ For analyses with residual equations that must be solved iteratively.
 - `solve_residuals(discipline, inputs)`
 
 **Optional methods:**
+- `set_options!(discipline, options)`
 - `compute_residual_partials(discipline, inputs)`
 
 ## API Reference
@@ -256,14 +271,46 @@ int main() {
 }
 ```
 
+### Setting Options from C++
+
+You can set discipline options from C++ before running computations:
+
+```cpp
+#include "julia_explicit.h"
+
+// Create and setup discipline
+philote::JuliaExplicitDiscipline discipline("my.jl", "MyDiscipline");
+discipline.Initialize();
+discipline.Setup();
+
+// Set options
+std::map<std::string, std::pair<std::string, std::string>> options;
+options["scale_factor"] = {"2.5", "float"};  // {value, type}
+options["max_iterations"] = {"100", "int"};
+options["verbose"] = {"true", "bool"};
+options["method"] = {"newton", "string"};
+
+discipline.SetOptions(options);
+
+// Now compute...
+```
+
+Supported option types:
+- `"float"` - Converted to Float64
+- `"int"` - Converted to Int64
+- `"bool"` - Converted to Bool
+- `"string"` - Converted to String
+
 ### What the C++ Wrapper Provides
 
 The wrapper includes:
 - **JuliaRuntime**: Singleton managing Julia lifecycle
 - **JuliaMarshal**: Bidirectional C++/Julia data conversion
 - **JuliaExplicitDiscipline**: Wrapper class inheriting from `philote::ExplicitDiscipline`
+- **JuliaImplicitDiscipline**: Wrapper class for implicit disciplines
+- **Options marshalling**: Type-aware conversion of configuration options
 - **CMake integration**: FindJulia module and build system
-- **Example server**: Complete working example
+- **Example servers**: Complete working examples
 
 See [`cpp/README.md`](cpp/README.md) for detailed documentation.
 

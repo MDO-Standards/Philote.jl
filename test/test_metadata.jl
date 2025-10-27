@@ -125,4 +125,13 @@ using Test
         @test meta.name == "CompleteTest"
         @test meta.version == "1.0.0"
     end
+
+    @testset "Set Options" begin
+        # Test the default set_options! (does nothing)
+        discipline = TestDiscipline()
+        options = Dict("foo" => 1.0, "bar" => "test")
+
+        # Should not throw even though discipline doesn't override set_options!
+        @test_nowarn Philote.set_options!(discipline, options)
+    end
 end
