@@ -2,7 +2,7 @@
 #define PHILOTE_JULIA_MARSHAL_H
 
 #include <julia.h>
-#include <philote/variable.h>
+#include <variable.h>
 #include <string>
 #include <map>
 #include <vector>

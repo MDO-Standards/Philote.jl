@@ -1,7 +1,7 @@
 #ifndef PHILOTE_JULIA_EXPLICIT_H
 #define PHILOTE_JULIA_EXPLICIT_H
 
-#include <philote/explicit.h>
+#include <explicit.h>
 #include <julia.h>
 #include <string>
 
@@ -34,12 +34,12 @@ public:
      * @brief Construct a Julia explicit discipline wrapper
      *
      * @param filepath Path to the .jl file containing the discipline
-     * @param typename Name of the Julia type (must be a subtype of ExplicitDiscipline)
+     * @param type_name Name of the Julia type (must be a subtype of ExplicitDiscipline)
      *
      * @throws JuliaException if file cannot be loaded or type not found
      */
     JuliaExplicitDiscipline(const std::string& filepath,
-                           const std::string& typename);
+                           const std::string& type_name);
 
     /**
      * @brief Destructor
@@ -87,7 +87,7 @@ private:
 
     // Julia discipline information
     std::string filepath_;
-    std::string typename_;
+    std::string type_name_;
 
     // Julia objects (protected from GC)
     jl_module_t* module_;

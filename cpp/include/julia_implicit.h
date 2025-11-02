@@ -1,7 +1,7 @@
 #ifndef PHILOTE_JULIA_IMPLICIT_H
 #define PHILOTE_JULIA_IMPLICIT_H
 
-#include <philote/implicit.h>
+#include <implicit.h>
 #include <julia.h>
 #include <string>
 
@@ -40,12 +40,12 @@ public:
      * @brief Construct a Julia implicit discipline wrapper
      *
      * @param filepath Path to the .jl file containing the discipline
-     * @param typename Name of the Julia type (must be a subtype of ImplicitDiscipline)
+     * @param type_name Name of the Julia type (must be a subtype of ImplicitDiscipline)
      *
      * @throws JuliaException if file cannot be loaded or type not found
      */
     JuliaImplicitDiscipline(const std::string& filepath,
-                           const std::string& typename);
+                           const std::string& type_name);
 
     /**
      * @brief Destructor
@@ -67,9 +67,9 @@ public:
     void SolveResiduals(const Variables& inputs,
                        Variables& outputs) override;
 
-    void ComputeResidualPartials(const Variables& inputs,
-                                const Variables& outputs,
-                                Partials& partials) override;
+    void ComputeResidualGradients(const Variables& inputs,
+                                 const Variables& outputs,
+                                 Partials& partials) override;
 
     /**
      * @brief Set discipline options
@@ -101,7 +101,7 @@ private:
 
     // Julia discipline information
     std::string filepath_;
-    std::string typename_;
+    std::string type_name_;
 
     // Julia objects (protected from GC)
     jl_module_t* module_;
