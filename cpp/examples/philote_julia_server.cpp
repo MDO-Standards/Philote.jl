@@ -105,42 +105,59 @@ int main(int argc, char** argv) {
     try {
         std::cout << "Loading Julia discipline...\n";
 
-        std::cout << "\n====================================================\n";
-        std::cout << "  Starting gRPC Server\n";
-        std::cout << "====================================================\n\n";
-
-        // Build and start gRPC server
-        ServerBuilder builder;
-        builder.AddListeningPort(config.server_address,
-                                grpc::InsecureServerCredentials());
-
-        std::unique_ptr<Server> server;
-
-        // Create discipline based on kind and start server
-        // Keep discipline alive for the lifetime of the server
+        // Create discipline based on kind
         if (config.discipline_kind == philote::DisciplineKind::Explicit) {
-            static auto discipline = std::make_unique<philote::JuliaExplicitDiscipline>(
+            philote::JuliaExplicitDiscipline discipline(
                 config.julia_file,
                 config.julia_type
             );
-            discipline->RegisterServices(builder);
-            server = builder.BuildAndStart();
+
+            std::cout << "\n====================================================\n";
+            std::cout << "  Starting gRPC Server\n";
+            std::cout << "====================================================\n\n";
+
+            // Build and start gRPC server
+            ServerBuilder builder;
+            builder.AddListeningPort(config.server_address,
+                                    grpc::InsecureServerCredentials());
+            discipline.RegisterServices(builder);
+
+            std::unique_ptr<Server> server(builder.BuildAndStart());
+
+            std::cout << "✓ Server listening on: " << config.server_address << "\n";
+            std::cout << "\nThe server is now ready to accept connections.\n";
+            std::cout << "Press Ctrl+C to stop the server.\n\n";
+            std::cout << "====================================================\n";
+
+            // Wait for server to be shutdown
+            server->Wait();
+
         } else {
-            static auto discipline = std::make_unique<philote::JuliaImplicitDiscipline>(
+            philote::JuliaImplicitDiscipline discipline(
                 config.julia_file,
                 config.julia_type
             );
-            discipline->RegisterServices(builder);
-            server = builder.BuildAndStart();
+
+            std::cout << "\n====================================================\n";
+            std::cout << "  Starting gRPC Server\n";
+            std::cout << "====================================================\n\n";
+
+            // Build and start gRPC server
+            ServerBuilder builder;
+            builder.AddListeningPort(config.server_address,
+                                    grpc::InsecureServerCredentials());
+            discipline.RegisterServices(builder);
+
+            std::unique_ptr<Server> server(builder.BuildAndStart());
+
+            std::cout << "✓ Server listening on: " << config.server_address << "\n";
+            std::cout << "\nThe server is now ready to accept connections.\n";
+            std::cout << "Press Ctrl+C to stop the server.\n\n";
+            std::cout << "====================================================\n";
+
+            // Wait for server to be shutdown
+            server->Wait();
         }
-
-        std::cout << "✓ Server listening on: " << config.server_address << "\n";
-        std::cout << "\nThe server is now ready to accept connections.\n";
-        std::cout << "Press Ctrl+C to stop the server.\n\n";
-        std::cout << "====================================================\n";
-
-        // Wait for server to be shutdown
-        server->Wait();
 
     } catch (const philote::JuliaException& e) {
         std::cerr << "\n❌ Julia Error: " << e.what() << std::endl;
