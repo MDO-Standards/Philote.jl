@@ -106,8 +106,9 @@ int main(int argc, char** argv) {
         std::cout << "Loading Julia discipline...\n";
 
         // Create discipline based on kind
+        // Must use shared_ptr because RegisterServices() calls shared_from_this()
         if (config.discipline_kind == philote::DisciplineKind::Explicit) {
-            philote::JuliaExplicitDiscipline discipline(
+            auto discipline = std::make_shared<philote::JuliaExplicitDiscipline>(
                 config.julia_file,
                 config.julia_type
             );
@@ -120,7 +121,7 @@ int main(int argc, char** argv) {
             ServerBuilder builder;
             builder.AddListeningPort(config.server_address,
                                     grpc::InsecureServerCredentials());
-            discipline.RegisterServices(builder);
+            discipline->RegisterServices(builder);
 
             std::unique_ptr<Server> server(builder.BuildAndStart());
 
@@ -133,7 +134,7 @@ int main(int argc, char** argv) {
             server->Wait();
 
         } else {
-            philote::JuliaImplicitDiscipline discipline(
+            auto discipline = std::make_shared<philote::JuliaImplicitDiscipline>(
                 config.julia_file,
                 config.julia_type
             );
@@ -146,7 +147,7 @@ int main(int argc, char** argv) {
             ServerBuilder builder;
             builder.AddListeningPort(config.server_address,
                                     grpc::InsecureServerCredentials());
-            discipline.RegisterServices(builder);
+            discipline->RegisterServices(builder);
 
             std::unique_ptr<Server> server(builder.BuildAndStart());
 

@@ -59,7 +59,8 @@ int main(int argc, char** argv) {
 
     try {
         // Create Julia-wrapped discipline
-        philote::JuliaExplicitDiscipline discipline(
+        // Must use shared_ptr because RegisterServices() calls shared_from_this()
+        auto discipline = std::make_shared<philote::JuliaExplicitDiscipline>(
             discipline_path.string(),
             "ParaboloidDiscipline"
         );
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
         ServerBuilder builder;
         builder.AddListeningPort(server_address,
                                 grpc::InsecureServerCredentials());
-        discipline.RegisterServices(builder);
+        discipline->RegisterServices(builder);
 
         std::unique_ptr<Server> server(builder.BuildAndStart());
 
