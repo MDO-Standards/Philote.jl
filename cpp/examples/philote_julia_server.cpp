@@ -32,6 +32,7 @@
 #include "config.h"
 #include "julia_explicit.h"
 #include "julia_implicit.h"
+#include "julia_runtime.h"
 #include <grpc++/grpc++.h>
 #include <iostream>
 #include <memory>
@@ -102,22 +103,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-        // Create discipline based on kind
-        std::unique_ptr<philote::Discipline> discipline;
-
         std::cout << "Loading Julia discipline...\n";
-
-        if (config.discipline_kind == philote::DisciplineKind::Explicit) {
-            discipline = std::make_unique<philote::JuliaExplicitDiscipline>(
-                config.julia_file,
-                config.julia_type
-            );
-        } else {
-            discipline = std::make_unique<philote::JuliaImplicitDiscipline>(
-                config.julia_file,
-                config.julia_type
-            );
-        }
 
         std::cout << "\n====================================================\n";
         std::cout << "  Starting gRPC Server\n";
@@ -127,9 +113,26 @@ int main(int argc, char** argv) {
         ServerBuilder builder;
         builder.AddListeningPort(config.server_address,
                                 grpc::InsecureServerCredentials());
-        discipline->RegisterServices(builder);
 
-        std::unique_ptr<Server> server(builder.BuildAndStart());
+        std::unique_ptr<Server> server;
+
+        // Create discipline based on kind and start server
+        // Keep discipline alive for the lifetime of the server
+        if (config.discipline_kind == philote::DisciplineKind::Explicit) {
+            static auto discipline = std::make_unique<philote::JuliaExplicitDiscipline>(
+                config.julia_file,
+                config.julia_type
+            );
+            discipline->RegisterServices(builder);
+            server = builder.BuildAndStart();
+        } else {
+            static auto discipline = std::make_unique<philote::JuliaImplicitDiscipline>(
+                config.julia_file,
+                config.julia_type
+            );
+            discipline->RegisterServices(builder);
+            server = builder.BuildAndStart();
+        }
 
         std::cout << "✓ Server listening on: " << config.server_address << "\n";
         std::cout << "\nThe server is now ready to accept connections.\n";

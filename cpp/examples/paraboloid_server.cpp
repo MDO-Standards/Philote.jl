@@ -20,6 +20,7 @@
  */
 
 #include "julia_explicit.h"
+#include "julia_runtime.h"
 #include <grpc++/grpc++.h>
 #include <iostream>
 #include <memory>
