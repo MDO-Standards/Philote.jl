@@ -64,11 +64,11 @@ target_include_directories(PhiloteJulia PUBLIC
 )
 
 target_link_libraries(PhiloteJulia PUBLIC
-    PhiloteCpp
+    PhiloteCpp::PhiloteCpp
     ${JULIA_LIBRARY}
     protobuf::libprotobuf
     gRPC::grpc++
-    yaml-cpp
+    yaml-cpp::yaml-cpp
 )
 
 # ============================================================================

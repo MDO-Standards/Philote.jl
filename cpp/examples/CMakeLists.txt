@@ -10,10 +10,9 @@ add_executable(philote_julia_server
 
 target_link_libraries(philote_julia_server
     PhiloteJulia
-    PhiloteCpp
     gRPC::grpc++
     protobuf::libprotobuf
-    yaml-cpp
+    yaml-cpp::yaml-cpp
 )
 
 set_target_properties(philote_julia_server
@@ -35,7 +34,6 @@ add_executable(paraboloid_server
 
 target_link_libraries(paraboloid_server
     PhiloteJulia
-    PhiloteCpp
     gRPC::grpc++
     protobuf::libprotobuf
 )
