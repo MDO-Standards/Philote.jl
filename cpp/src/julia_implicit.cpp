@@ -246,7 +246,9 @@ void JuliaImplicitDiscipline::SetupPartials() {
         size_t length = jl_array_len(arr);
 
         for (size_t i = 0; i < length; i++) {
-            jl_value_t* tuple = jl_array_ptr_ref(arr, i);
+            // Access array element - for Julia arrays of objects, use data pointer
+            jl_value_t** data = (jl_value_t**)jl_array_data(arr, jl_value_t*);
+            jl_value_t* tuple = data[i];
 
             // Extract (residual, input) pair
             jl_value_t* residual_str = jl_get_nth_field(tuple, 0);

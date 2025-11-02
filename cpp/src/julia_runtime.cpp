@@ -4,6 +4,18 @@
 
 namespace philote {
 
+// JuliaThreadAdopter implementation
+JuliaThreadAdopter::JuliaThreadAdopter() {
+    std::cout << "[JuliaThreadAdopter] Constructor called" << std::endl;
+    gcframe_ = JuliaRuntime::Instance().AdoptThread();
+    std::cout << "[JuliaThreadAdopter] Constructor complete" << std::endl;
+}
+
+JuliaThreadAdopter::~JuliaThreadAdopter() {
+    JuliaRuntime::Instance().ReleaseThread(gcframe_);
+}
+
+// JuliaRuntime implementation
 JuliaRuntime& JuliaRuntime::Instance() {
     static JuliaRuntime instance;
     return instance;
@@ -155,6 +167,33 @@ void JuliaRuntime::CheckException() const {
     if (HasException()) {
         std::string msg = GetExceptionMessage();
         throw JuliaException(msg);
+    }
+}
+
+jl_gcframe_t** JuliaRuntime::AdoptThread() {
+    std::cout << "[Julia] AdoptThread() called" << std::endl;
+
+    if (!initialized_) {
+        throw JuliaException("Julia runtime not initialized");
+    }
+
+    std::cout << "[Julia] Calling jl_adopt_thread()..." << std::endl;
+
+    // Adopt this thread for Julia
+    // Note: jl_adopt_thread() returns the previous pgcstack value
+    // For a non-Julia thread, this will set up Julia runtime for this thread
+    jl_gcframe_t** gcframe = jl_adopt_thread();
+
+    std::cout << "[Julia] Thread adopted successfully, gcframe=" << gcframe << std::endl;
+    return gcframe;
+}
+
+void JuliaRuntime::ReleaseThread(jl_gcframe_t** gcframe) {
+    // Only release if we actually adopted the thread
+    if (gcframe != nullptr) {
+        // Note: Julia doesn't have a public jl_release_thread API
+        // The thread will be released when Julia shuts down
+        // For now, we just track that we're done with this thread's Julia work
     }
 }
 

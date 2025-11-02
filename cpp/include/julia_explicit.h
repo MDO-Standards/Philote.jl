@@ -99,6 +99,9 @@ private:
     jl_function_t* compute_partials_fn_;
     jl_function_t* get_metadata_fn_;
     jl_function_t* set_options_fn_;
+
+    // Track if setup has been called
+    bool setup_complete_;
 };
 
 } // namespace philote

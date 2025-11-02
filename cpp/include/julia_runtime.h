@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <stdexcept>
+#include <mutex>
 
 namespace philote {
 
@@ -16,6 +17,31 @@ class JuliaException : public std::runtime_error {
 public:
     explicit JuliaException(const std::string& msg)
         : std::runtime_error("Julia error: " + msg) {}
+};
+
+// Forward declaration
+class JuliaRuntime;
+
+/**
+ * @brief RAII helper to adopt current thread for Julia calls
+ *
+ * Usage:
+ *   JuliaThreadAdopter adopter;
+ *   // Now safe to call Julia functions
+ */
+class JuliaThreadAdopter {
+public:
+    JuliaThreadAdopter();
+    ~JuliaThreadAdopter();
+
+    // Delete copy and move
+    JuliaThreadAdopter(const JuliaThreadAdopter&) = delete;
+    JuliaThreadAdopter& operator=(const JuliaThreadAdopter&) = delete;
+    JuliaThreadAdopter(JuliaThreadAdopter&&) = delete;
+    JuliaThreadAdopter& operator=(JuliaThreadAdopter&&) = delete;
+
+private:
+    jl_gcframe_t** gcframe_;
 };
 
 /**
@@ -139,6 +165,31 @@ public:
      */
     jl_value_t* Eval(const std::string& expr);
 
+    /**
+     * @brief Get mutex for thread-safe Julia calls
+     *
+     * @return Reference to the mutex protecting Julia calls
+     */
+    std::mutex& GetMutex() { return julia_mutex_; }
+
+    /**
+     * @brief Adopt current thread for Julia if needed
+     *
+     * This must be called before any Julia API calls from non-Julia threads
+     * (like gRPC worker threads). Returns the gcframe that should be passed
+     * to ReleaseThread when done.
+     *
+     * @return GC frame pointer, or nullptr if thread was already adopted
+     */
+    jl_gcframe_t** AdoptThread();
+
+    /**
+     * @brief Release adopted thread
+     *
+     * @param gcframe The gcframe returned from AdoptThread, or nullptr
+     */
+    void ReleaseThread(jl_gcframe_t** gcframe);
+
 private:
     JuliaRuntime();
     ~JuliaRuntime();
@@ -151,6 +202,7 @@ private:
 
     bool initialized_;
     std::vector<jl_value_t*> gc_roots_;
+    std::mutex julia_mutex_;  // Protect Julia calls from multiple threads
 };
 
 } // namespace philote

@@ -15,7 +15,8 @@ JuliaExplicitDiscipline::JuliaExplicitDiscipline(const std::string& filepath,
       compute_fn_(nullptr),
       compute_partials_fn_(nullptr),
       get_metadata_fn_(nullptr),
-      set_options_fn_(nullptr) {
+      set_options_fn_(nullptr),
+      setup_complete_(false) {
 
     // Initialize Julia runtime
     JuliaRuntime::Instance().Initialize();
@@ -35,8 +36,11 @@ void JuliaExplicitDiscipline::Initialize() {
     // Base class initialization
     Discipline::Initialize();
 
-    // Julia-specific initialization (if needed)
-    // This is called before Setup()
+    // Test Julia call in constructor thread (works)
+    std::cout << "Testing Julia call from Initialize()..." << std::endl;
+    CallSetup();
+    ExtractMetadata();
+    std::cout << "Initialize test successful!" << std::endl;
 }
 
 void JuliaExplicitDiscipline::LoadDiscipline() {
@@ -98,6 +102,11 @@ void JuliaExplicitDiscipline::LoadDiscipline() {
 }
 
 void JuliaExplicitDiscipline::Setup() {
+    if (setup_complete_) {
+        std::cout << "Setup already completed, skipping..." << std::endl;
+        return;
+    }
+
     std::cout << "Setting up Julia discipline..." << std::endl;
 
     // Call the Julia setup! function
@@ -106,15 +115,32 @@ void JuliaExplicitDiscipline::Setup() {
     // Extract metadata from Julia and populate C++ discipline
     ExtractMetadata();
 
+    setup_complete_ = true;
     std::cout << "Julia discipline setup complete" << std::endl;
 }
 
 void JuliaExplicitDiscipline::CallSetup() {
     auto& runtime = JuliaRuntime::Instance();
 
+    // Verify pointers before calling
+    if (setup_fn_ == nullptr) {
+        throw JuliaException("setup_fn_ is null");
+    }
+    if (discipline_obj_ == nullptr) {
+        throw JuliaException("discipline_obj_ is null");
+    }
+
+    std::cout << "Calling Philote.setup!(discipline)..." << std::endl;
+
+    // Lock mutex and adopt thread for thread-safe Julia call
+    std::lock_guard<std::mutex> lock(runtime.GetMutex());
+    JuliaThreadAdopter adopter;  // Adopt this thread for Julia
+
     // Call Philote.setup!(discipline)
     jl_call1(setup_fn_, discipline_obj_);
     runtime.CheckException();
+
+    std::cout << "Philote.setup!() completed" << std::endl;
 }
 
 void JuliaExplicitDiscipline::ExtractMetadata() {
@@ -222,7 +248,9 @@ void JuliaExplicitDiscipline::SetupPartials() {
         size_t length = jl_array_len(arr);
 
         for (size_t i = 0; i < length; i++) {
-            jl_value_t* tuple = jl_array_ptr_ref(arr, i);
+            // Access array element - for Julia arrays of objects, use data pointer
+            jl_value_t** data = (jl_value_t**)jl_array_data(arr, jl_value_t*);
+            jl_value_t* tuple = data[i];
 
             // Extract (output, input) pair
             jl_value_t* output_str = jl_get_nth_field(tuple, 0);
@@ -243,6 +271,10 @@ void JuliaExplicitDiscipline::SetupPartials() {
 void JuliaExplicitDiscipline::Compute(const Variables& inputs,
                                      Variables& outputs) {
     auto& runtime = JuliaRuntime::Instance();
+
+    // Lock mutex and adopt thread for thread-safe Julia call
+    std::lock_guard<std::mutex> lock(runtime.GetMutex());
+    JuliaThreadAdopter adopter;
 
     // Convert C++ inputs to Julia Dict
     jl_value_t* inputs_dict = JuliaMarshal::ToJuliaDict(inputs);
@@ -265,6 +297,10 @@ void JuliaExplicitDiscipline::Compute(const Variables& inputs,
 void JuliaExplicitDiscipline::ComputePartials(const Variables& inputs,
                                              Partials& partials) {
     auto& runtime = JuliaRuntime::Instance();
+
+    // Lock mutex and adopt thread for thread-safe Julia call
+    std::lock_guard<std::mutex> lock(runtime.GetMutex());
+    JuliaThreadAdopter adopter;
 
     // Convert C++ inputs to Julia Dict
     jl_value_t* inputs_dict = JuliaMarshal::ToJuliaDict(inputs);

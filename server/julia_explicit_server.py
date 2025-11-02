@@ -20,6 +20,9 @@ import data_pb2_grpc
 import disciplines_pb2
 import disciplines_pb2_grpc
 
+# Import Empty message from google.protobuf
+from google.protobuf import empty_pb2
+
 # Import juliacall to call Julia from Python
 from juliacall import Main as jl
 
@@ -70,45 +73,64 @@ class JuliaExplicitServer(disciplines_pb2_grpc.DisciplineServiceServicer,
 
     def _load_julia_discipline(self):
         """Load the Julia discipline using juliacall."""
-        print(f"Loading Julia discipline from: {self.julia_file}")
+        print(f"[DEBUG] Loading Julia discipline from: {self.julia_file}")
+        print(f"[DEBUG] Julia type: {self.julia_type}")
 
         # Load the Philote module
         philote_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        print(f"[DEBUG] Philote directory: {philote_dir}")
+
+        print("[DEBUG] Adding to LOAD_PATH...")
         jl.seval(f'push!(LOAD_PATH, "{philote_dir}")')
+
+        print("[DEBUG] Loading Philote module...")
         jl.seval('using Philote')
 
         # Load the discipline file
+        print(f"[DEBUG] Including discipline file: {self.julia_file}")
         jl.seval(f'include("{self.julia_file}")')
 
         # Create discipline instance
-        print(f"Creating {self.julia_type} instance...")
+        print(f"[DEBUG] Creating {self.julia_type} instance...")
         self.discipline = jl.seval(f'{self.julia_type}()')
+        print(f"[DEBUG] Discipline created: {self.discipline}")
 
         # Call setup!
-        print("Calling setup!...")
-        jl.seval('Philote.setup!')(self.discipline)
+        print("[DEBUG] Calling setup!...")
+        setup_fn = jl.seval('Philote.setup!')
+        print(f"[DEBUG] Got setup function: {setup_fn}")
+        setup_fn(self.discipline)
+        print("[DEBUG] setup! completed")
 
         # Get metadata
-        self.metadata = jl.seval('Philote.get_metadata')(self.discipline)
+        print("[DEBUG] Getting metadata...")
+        get_meta_fn = jl.seval('Philote.get_metadata')
+        self.metadata = get_meta_fn(self.discipline)
+        print(f"[DEBUG] Got metadata: {self.metadata}")
 
-        print("Julia discipline loaded successfully")
+        print("✓ Julia discipline loaded successfully")
         print(f"  Inputs: {list(self.metadata.inputs.keys())}")
         print(f"  Outputs: {list(self.metadata.outputs.keys())}")
 
     def GetInfo(self, request, context):
         """Return discipline properties."""
-        return data_pb2.DisciplineProperties(
+        print("[DEBUG] GetInfo called")
+        result = data_pb2.DisciplineProperties(
             continuous=True,
             differentiable=len(self.metadata.partials) > 0,
             provides_gradients=len(self.metadata.partials) > 0,
             name=self.metadata.name,
             version=self.metadata.version
         )
+        print(f"[DEBUG] GetInfo returning: {result}")
+        return result
 
     def SetStreamOptions(self, request, context):
         """Set streaming chunk size."""
+        print("[DEBUG] SetStreamOptions called")
         self.stream_opts = request
-        return data_pb2.Empty()
+        print(f"[DEBUG] SetStreamOptions set to: {self.stream_opts}")
+        return empty_pb2.Empty()
 
     def GetAvailableOptions(self, request, context):
         """Return available options."""
@@ -137,16 +159,19 @@ class JuliaExplicitServer(disciplines_pb2_grpc.DisciplineServiceServicer,
         jl_dict = jl.Dict(options_dict)
         jl.seval('Philote.set_options!')(self.discipline, jl_dict)
 
-        return data_pb2.Empty()
+        return empty_pb2.Empty()
 
     def Setup(self, request, context):
         """Setup is already done in __init__, just return empty."""
-        return data_pb2.Empty()
+        print("[DEBUG] Setup called")
+        return empty_pb2.Empty()
 
     def GetVariableDefinitions(self, request, context):
         """Stream variable metadata to client."""
+        print("[DEBUG] GetVariableDefinitions called")
         # Send inputs
         for name, (shape, units) in self.metadata.inputs.items():
+            print(f"[DEBUG] Sending input: {name}, shape={shape}, units={units}")
             yield data_pb2.VariableMetaData(
                 type=data_pb2.kInput,
                 name=name,
@@ -156,15 +181,18 @@ class JuliaExplicitServer(disciplines_pb2_grpc.DisciplineServiceServicer,
 
         # Send outputs
         for name, (shape, units) in self.metadata.outputs.items():
+            print(f"[DEBUG] Sending output: {name}, shape={shape}, units={units}")
             yield data_pb2.VariableMetaData(
                 type=data_pb2.kOutput,
                 name=name,
                 shape=shape,
                 units=units
             )
+        print("[DEBUG] GetVariableDefinitions complete")
 
     def GetPartialDefinitions(self, request, context):
         """Stream partial derivative metadata to client."""
+        print("[DEBUG] GetPartialDefinitions called")
         for output, input_var in self.metadata.partials:
             # Get shapes
             out_shape = self.metadata.outputs[output][0]
@@ -173,44 +201,59 @@ class JuliaExplicitServer(disciplines_pb2_grpc.DisciplineServiceServicer,
             # Jacobian shape
             jac_shape = list(out_shape) + list(in_shape)
 
+            print(f"[DEBUG] Sending partial: {output} wrt {input_var}, shape={jac_shape}")
             yield data_pb2.PartialsMetaData(
                 name=output,
                 subname=input_var,
                 shape=jac_shape
             )
+        print("[DEBUG] GetPartialDefinitions complete")
 
     def ComputeFunction(self, request_iterator, context):
         """Compute outputs from inputs."""
+        print("[DEBUG] ComputeFunction called")
         # Collect inputs from stream
         inputs = {}
         for msg in request_iterator:
+            print(f"[DEBUG] Received input chunk: {msg.name}, start={msg.start}, end={msg.end}, data={msg.data}")
             if msg.name not in inputs:
                 # Get shape from metadata
                 shape = self.metadata.inputs[msg.name][0]
                 size = int(np.prod(shape))
                 inputs[msg.name] = np.zeros(size)
+                print(f"[DEBUG] Created input array for {msg.name}, shape={shape}, size={size}")
 
             # Fill in chunk
             inputs[msg.name][msg.start:msg.end+1] = msg.data
+            print(f"[DEBUG] Filled chunk for {msg.name}")
 
         # Reshape inputs to proper shape
+        print(f"[DEBUG] Reshaping inputs...")
         for name in inputs:
             shape = self.metadata.inputs[name][0]
             inputs[name] = inputs[name].reshape(shape)
+            print(f"[DEBUG] Reshaped {name} to {shape}: {inputs[name]}")
 
         # Convert to Julia dict (juliacall handles numpy → Julia conversion)
+        print(f"[DEBUG] Converting to Julia dict...")
         jl_inputs = jl.Dict(inputs)
+        print(f"[DEBUG] Julia inputs: {jl_inputs}")
 
         # Call Julia compute
+        print(f"[DEBUG] Calling Julia compute...")
         jl_outputs = jl.seval('Philote.compute')(self.discipline, jl_inputs)
+        print(f"[DEBUG] Julia compute returned: {jl_outputs}")
 
         # Stream outputs back to client
+        print(f"[DEBUG] Streaming outputs...")
         for name, value in jl_outputs.items():
             # Convert Julia array to numpy
             np_value = np.array(value)
+            print(f"[DEBUG] Output {name}: {np_value}")
 
             # Send in chunks
             for start, end in get_chunk_indices(np_value.size, self.stream_opts.num_double):
+                print(f"[DEBUG] Sending chunk {start}:{end} of {name}")
                 yield data_pb2.Array(
                     name=name,
                     type=data_pb2.kOutput,
@@ -218,6 +261,7 @@ class JuliaExplicitServer(disciplines_pb2_grpc.DisciplineServiceServicer,
                     end=end - 1,
                     data=np_value.ravel()[start:end]
                 )
+        print("[DEBUG] ComputeFunction complete")
 
     def ComputeGradient(self, request_iterator, context):
         """Compute partial derivatives."""

@@ -291,8 +291,10 @@ std::vector<std::string> JuliaMarshal::GetDictKeys(jl_value_t* dict) {
     jl_array_t* arr = (jl_array_t*)keys_array;
     size_t length = jl_array_len(arr);
 
+    // Access array data - for Julia arrays of objects, use data pointer
+    jl_value_t** data = (jl_value_t**)jl_array_data(arr, jl_value_t*);
     for (size_t i = 0; i < length; i++) {
-        jl_value_t* key = jl_array_ptr_ref(arr, i);
+        jl_value_t* key = data[i];
         if (jl_is_string(key)) {
             result.push_back(std::string(jl_string_ptr(key)));
         }
