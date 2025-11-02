@@ -6,9 +6,9 @@
 namespace philote {
 
 JuliaImplicitDiscipline::JuliaImplicitDiscipline(const std::string& filepath,
-                                                 const std::string& typename)
+                                                 const std::string& type_name)
     : filepath_(filepath),
-      typename_(typename),
+      type_name_(type_name),
       module_(nullptr),
       discipline_obj_(nullptr),
       setup_fn_(nullptr),
@@ -48,10 +48,10 @@ void JuliaImplicitDiscipline::LoadDiscipline() {
     module_ = runtime.LoadModule(filepath_);
 
     // Get the discipline constructor
-    jl_function_t* constructor = runtime.GetFunction(module_, typename_);
+    jl_function_t* constructor = runtime.GetFunction(module_, type_name_);
 
     // Create discipline instance: discipline = MyImplicitDiscipline()
-    std::cout << "Creating Julia implicit discipline instance: " << typename_ << std::endl;
+    std::cout << "Creating Julia implicit discipline instance: " << type_name_ << std::endl;
     discipline_obj_ = jl_call0(constructor);
     runtime.CheckException();
 
@@ -196,7 +196,7 @@ void JuliaImplicitDiscipline::ExtractMetadata() {
         jl_value_t* units_str = jl_get_nth_field(tuple, 1);
         std::string units(jl_string_ptr(units_str));
 
-        AddResidual(name, shape, units);
+        AddOutput(name, shape, units);
         std::cout << "  Residual: " << name << " shape=[";
         for (size_t i = 0; i < shape.size(); i++) {
             std::cout << shape[i];
@@ -246,7 +246,7 @@ void JuliaImplicitDiscipline::SetupPartials() {
         size_t length = jl_array_len(arr);
 
         for (size_t i = 0; i < length; i++) {
-            jl_value_t* tuple = jl_arrayref(arr, i);
+            jl_value_t* tuple = jl_array_ptr_ref(arr, i);
 
             // Extract (residual, input) pair
             jl_value_t* residual_str = jl_get_nth_field(tuple, 0);
@@ -256,7 +256,7 @@ void JuliaImplicitDiscipline::SetupPartials() {
             std::string input(jl_string_ptr(input_str));
 
             // Declare partial in C++ discipline
-            DeclareResidualPartials(residual, input);
+            DeclarePartials(residual, input);
             std::cout << "  Partial: ∂" << residual << "/∂" << input << std::endl;
         }
     }
@@ -315,9 +315,9 @@ void JuliaImplicitDiscipline::SolveResiduals(const Variables& inputs,
     JuliaMarshal::FromJuliaDict(outputs_dict, outputs);
 }
 
-void JuliaImplicitDiscipline::ComputeResidualPartials(const Variables& inputs,
-                                                      const Variables& outputs,
-                                                      Partials& partials) {
+void JuliaImplicitDiscipline::ComputeResidualGradients(const Variables& inputs,
+                                                       const Variables& outputs,
+                                                       Partials& partials) {
     auto& runtime = JuliaRuntime::Instance();
 
     // Convert C++ inputs to Julia Dict

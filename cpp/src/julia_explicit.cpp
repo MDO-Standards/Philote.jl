@@ -6,9 +6,9 @@
 namespace philote {
 
 JuliaExplicitDiscipline::JuliaExplicitDiscipline(const std::string& filepath,
-                                                 const std::string& typename)
+                                                 const std::string& type_name)
     : filepath_(filepath),
-      typename_(typename),
+      type_name_(type_name),
       module_(nullptr),
       discipline_obj_(nullptr),
       setup_fn_(nullptr),
@@ -47,10 +47,10 @@ void JuliaExplicitDiscipline::LoadDiscipline() {
     module_ = runtime.LoadModule(filepath_);
 
     // Get the discipline constructor
-    jl_function_t* constructor = runtime.GetFunction(module_, typename_);
+    jl_function_t* constructor = runtime.GetFunction(module_, type_name_);
 
     // Create discipline instance: discipline = MyDiscipline()
-    std::cout << "Creating Julia discipline instance: " << typename_ << std::endl;
+    std::cout << "Creating Julia discipline instance: " << type_name_ << std::endl;
     discipline_obj_ = jl_call0(constructor);
     runtime.CheckException();
 
@@ -222,7 +222,7 @@ void JuliaExplicitDiscipline::SetupPartials() {
         size_t length = jl_array_len(arr);
 
         for (size_t i = 0; i < length; i++) {
-            jl_value_t* tuple = jl_arrayref(arr, i);
+            jl_value_t* tuple = jl_array_ptr_ref(arr, i);
 
             // Extract (output, input) pair
             jl_value_t* output_str = jl_get_nth_field(tuple, 0);
