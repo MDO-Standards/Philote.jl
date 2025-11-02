@@ -26,7 +26,7 @@ jl_array_t* JuliaMarshal::ToJuliaArray(const Variable& var) {
 
     // Copy data from C++ to Julia
     // Note: Julia uses column-major ordering, same as Fortran
-    double* data = (double*)jl_array_data(arr);
+    double* data = jl_array_data(arr, double);
     for (size_t i = 0; i < var.Size(); i++) {
         data[i] = var(i);
     }
@@ -100,7 +100,7 @@ jl_value_t* JuliaMarshal::ToJuliaVector(const std::vector<int64_t>& vec) {
     JuliaRuntime::Instance().CheckException();
 
     // Copy data
-    int64_t* data = (int64_t*)jl_array_data(arr);
+    int64_t* data = jl_array_data(arr, int64_t);
     std::memcpy(data, vec.data(), vec.size() * sizeof(int64_t));
 
     return (jl_value_t*)arr;
@@ -121,7 +121,7 @@ void JuliaMarshal::FromJuliaArray(jl_array_t* array, Variable& var) {
     }
 
     // Get array data
-    double* data = (double*)jl_array_data(array);
+    double* data = jl_array_data(array, double);
     size_t length = jl_array_len(array);
 
     // Check size matches
@@ -227,7 +227,7 @@ std::vector<int64_t> JuliaMarshal::FromJuliaVector(jl_value_t* vec) {
     std::vector<int64_t> result;
     result.reserve(length);
 
-    int64_t* data = (int64_t*)jl_array_data(arr);
+    int64_t* data = jl_array_data(arr, int64_t);
     for (size_t i = 0; i < length; i++) {
         result.push_back(data[i]);
     }
@@ -292,7 +292,7 @@ std::vector<std::string> JuliaMarshal::GetDictKeys(jl_value_t* dict) {
     size_t length = jl_array_len(arr);
 
     for (size_t i = 0; i < length; i++) {
-        jl_value_t* key = jl_arrayref(arr, i);
+        jl_value_t* key = jl_array_ptr_ref(arr, i);
         if (jl_is_string(key)) {
             result.push_back(std::string(jl_string_ptr(key)));
         }
