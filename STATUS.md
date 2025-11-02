@@ -31,10 +31,19 @@
 ## In Progress 🚧
 
 ### ComputeFunction Debugging
-- Server receives ComputeFunction requests
-- Issue with bidirectional streaming - server appears to wait for all inputs before processing
-- May be related to gRPC stream closure semantics
-- Need to test with actual Philote Python client to verify if issue is with test setup or server
+- ✅ Tested with actual Philote Python client (not just test scripts)
+- ✅ Confirmed server receives ComputeFunction call
+- ❌ **ISSUE IDENTIFIED**: Server only receives FIRST message from client stream
+  - Client sends: iter([x_message, y_message])
+  - Server receives: only x_message
+  - Server hangs waiting for y_message
+  - Client hangs waiting for response
+- Root cause: grpc not delivering all messages from iterator
+- See DEBUGGING.md for details
+- Possible solutions to investigate:
+  1. Check grpc/protobuf version compatibility
+  2. Try different streaming approach (manual iteration control)
+  3. Check if generated code needs regeneration with different options
 
 ## Pending ⏳
 
