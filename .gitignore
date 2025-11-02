@@ -1,5 +1,6 @@
 .idea/
 .claude/
+cpp/build/
 
 # Prerequisites
 *.d
