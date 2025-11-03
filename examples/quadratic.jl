@@ -21,24 +21,27 @@ using Philote
 Solves a quadratic equation ax² + bx + c = 0 using the quadratic formula.
 
 Inputs:
-- a (float): Coefficient of x²
-- b (float): Coefficient of x
-- c (float): Constant term
+
+  - a (float): Coefficient of x²
+  - b (float): Coefficient of x
+  - c (float): Constant term
 
 Outputs:
-- x (float): Solution to the equation (positive root)
+
+  - x (float): Solution to the equation (positive root)
 
 Residuals:
-- R (float): Residual value (should be zero at solution)
+
+  - R (float): Residual value (should be zero at solution)
 
 The residual is defined as:
-    R(x) = ax² + bx + c
+R(x) = ax² + bx + c
 
 The Jacobian is:
-    dR/dx = 2ax + b
-    dR/da = x²
-    dR/db = x
-    dR/dc = 1
+dR/dx = 2ax + b
+dR/da = x²
+dR/db = x
+dR/dc = 1
 """
 mutable struct QuadraticImplicitDiscipline <: Philote.ImplicitDiscipline
     tolerance::Float64
@@ -90,7 +93,9 @@ end
 
 Set configuration options for the quadratic solver.
 """
-function Philote.set_options!(discipline::QuadraticImplicitDiscipline, options::Dict{String, <:Any})
+function Philote.set_options!(
+    discipline::QuadraticImplicitDiscipline, options::Dict{String, <:Any}
+)
     if haskey(options, "tolerance")
         discipline.tolerance = Float64(options["tolerance"])
     end
@@ -107,9 +112,11 @@ Compute the residual R(x) = ax² + bx + c given current values of inputs and out
 For implicit disciplines, both inputs and the current guess for outputs
 are needed to compute residuals.
 """
-function Philote.compute_residuals(discipline::QuadraticImplicitDiscipline,
-                                   inputs::Dict{String, <:AbstractArray{Float64}},
-                                   outputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.compute_residuals(
+    discipline::QuadraticImplicitDiscipline,
+    inputs::Dict{String, <:AbstractArray{Float64}},
+    outputs::Dict{String, <:AbstractArray{Float64}},
+)
     # Extract coefficients from inputs
     a = inputs["a"][1]
     b = inputs["b"][1]
@@ -131,13 +138,15 @@ Solve for x that makes the residual zero using the quadratic formula.
 Modifies the outputs dictionary in place.
 
 For ax² + bx + c = 0:
-    x = (-b ± sqrt(b² - 4ac)) / (2a)
+x = (-b ± sqrt(b² - 4ac)) / (2a)
 
 We use the positive root (using +).
 """
-function Philote.solve_residuals(discipline::QuadraticImplicitDiscipline,
-                                 inputs::Dict{String, <:AbstractArray{Float64}},
-                                 outputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.solve_residuals(
+    discipline::QuadraticImplicitDiscipline,
+    inputs::Dict{String, <:AbstractArray{Float64}},
+    outputs::Dict{String, <:AbstractArray{Float64}},
+)
     # Extract coefficients
     a = inputs["a"][1]
     b = inputs["b"][1]
@@ -178,14 +187,16 @@ end
 Compute the Jacobian of the residual with respect to inputs and outputs.
 
 For R(x) = ax² + bx + c:
-    dR/dx = 2ax + b
-    dR/da = x²
-    dR/db = x
-    dR/dc = 1
+dR/dx = 2ax + b
+dR/da = x²
+dR/db = x
+dR/dc = 1
 """
-function Philote.residual_partials(discipline::QuadraticImplicitDiscipline,
-                                   inputs::Dict{String, <:AbstractArray{Float64}},
-                                   outputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.residual_partials(
+    discipline::QuadraticImplicitDiscipline,
+    inputs::Dict{String, <:AbstractArray{Float64}},
+    outputs::Dict{String, <:AbstractArray{Float64}},
+)
     # Extract values
     a = inputs["a"][1]
     b = inputs["b"][1]
@@ -199,14 +210,7 @@ function Philote.residual_partials(discipline::QuadraticImplicitDiscipline,
     dR_dc = 1.0
 
     # Return as nested dictionary
-    return Dict(
-        "R" => Dict(
-            "x" => [dR_dx],
-            "a" => [dR_da],
-            "b" => [dR_db],
-            "c" => [dR_dc]
-        )
-    )
+    return Dict("R" => Dict("x" => [dR_dx], "a" => [dR_da], "b" => [dR_db], "c" => [dR_dc]))
 end
 
 # Example usage when run as a standalone script
@@ -274,7 +278,9 @@ if abspath(PROGRAM_FILE) == @__FILE__
     println("=" ^ 50)
 
     inputs2 = Dict("a" => [1.0], "b" => [-2.0], "c" => [-3.0])
-    println("Coefficients: a=$(inputs2["a"][1]), b=$(inputs2["b"][1]), c=$(inputs2["c"][1])")
+    println(
+        "Coefficients: a=$(inputs2["a"][1]), b=$(inputs2["b"][1]), c=$(inputs2["c"][1])"
+    )
 
     outputs2 = Dict("x" => [0.0])
     Philote.solve_residuals(discipline, inputs2, outputs2)
@@ -290,7 +296,9 @@ if abspath(PROGRAM_FILE) == @__FILE__
     println("=" ^ 50)
 
     inputs3 = Dict("a" => [2.0], "b" => [3.0], "c" => [-2.0])
-    println("Coefficients: a=$(inputs3["a"][1]), b=$(inputs3["b"][1]), c=$(inputs3["c"][1])")
+    println(
+        "Coefficients: a=$(inputs3["a"][1]), b=$(inputs3["b"][1]), c=$(inputs3["c"][1])"
+    )
 
     outputs3 = Dict("x" => [0.0])
     Philote.solve_residuals(discipline, inputs3, outputs3)

@@ -12,12 +12,16 @@ function Philote.setup!(discipline::TestExplicitDiscipline)
     Philote.declare_partials!(discipline, "y", "x")
 end
 
-function Philote.compute(discipline::TestExplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.compute(
+    discipline::TestExplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}
+)
     x = inputs["x"][1]
     return Dict("y" => [x^2])
 end
 
-function Philote.compute_partials(discipline::TestExplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.compute_partials(
+    discipline::TestExplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}
+)
     x = inputs["x"][1]
     return Dict("y" => Dict("x" => reshape([2*x], 1, 1)))
 end
@@ -36,9 +40,11 @@ function Philote.setup!(discipline::TestImplicitDiscipline)
     Philote.declare_partials!(discipline, "r", "x")
 end
 
-function Philote.compute_residuals(discipline::TestImplicitDiscipline,
-                                  inputs::Dict{String, <:AbstractArray{Float64}},
-                                  outputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.compute_residuals(
+    discipline::TestImplicitDiscipline,
+    inputs::Dict{String, <:AbstractArray{Float64}},
+    outputs::Dict{String, <:AbstractArray{Float64}},
+)
     a = inputs["a"][1]
     b = inputs["b"][1]
     x = outputs["x"][1]
@@ -46,26 +52,30 @@ function Philote.compute_residuals(discipline::TestImplicitDiscipline,
     return Dict("r" => [r])
 end
 
-function Philote.solve_residuals(discipline::TestImplicitDiscipline,
-                                inputs::Dict{String, <:AbstractArray{Float64}},
-                                outputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.solve_residuals(
+    discipline::TestImplicitDiscipline,
+    inputs::Dict{String, <:AbstractArray{Float64}},
+    outputs::Dict{String, <:AbstractArray{Float64}},
+)
     a = inputs["a"][1]
     b = inputs["b"][1]
     x = b / a
     outputs["x"][1] = x
 end
 
-function Philote.residual_partials(discipline::TestImplicitDiscipline,
-                                  inputs::Dict{String, <:AbstractArray{Float64}},
-                                  outputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.residual_partials(
+    discipline::TestImplicitDiscipline,
+    inputs::Dict{String, <:AbstractArray{Float64}},
+    outputs::Dict{String, <:AbstractArray{Float64}},
+)
     a = inputs["a"][1]
     x = outputs["x"][1]
     return Dict(
         "r" => Dict(
             "a" => reshape([x], 1, 1),
             "b" => reshape([-1.0], 1, 1),
-            "x" => reshape([a], 1, 1)
-        )
+            "x" => reshape([a], 1, 1),
+        ),
     )
 end
 
@@ -108,7 +118,7 @@ end
 
         # Test compute_partials
         partials = Philote.compute_partials(disc, inputs)
-        @test partials["y"]["x"][1,1] ≈ 6.0
+        @test partials["y"]["x"][1, 1] ≈ 6.0
     end
 
     @testset "Simple Implicit Discipline" begin
@@ -140,9 +150,9 @@ end
         # Test residual_partials
         outputs = Dict("x" => [3.0])
         partials = Philote.residual_partials(disc, inputs, outputs)
-        @test partials["r"]["a"][1,1] ≈ 3.0
-        @test partials["r"]["b"][1,1] ≈ -1.0
-        @test partials["r"]["x"][1,1] ≈ 2.0
+        @test partials["r"]["a"][1, 1] ≈ 3.0
+        @test partials["r"]["b"][1, 1] ≈ -1.0
+        @test partials["r"]["x"][1, 1] ≈ 2.0
     end
 
     @testset "Input Validation" begin
@@ -190,9 +200,11 @@ end
             Philote.add_output!(discipline, "norm", [1], "m")
         end
 
-        function Philote.compute(discipline::VectorDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+        function Philote.compute(
+            discipline::VectorDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}
+        )
             vec = inputs["vec"]
-            norm_val = sqrt(sum(vec.^2))
+            norm_val = sqrt(sum(vec .^ 2))
             return Dict("norm" => [norm_val])
         end
 
@@ -270,13 +282,18 @@ end
             Philote.add_output!(discipline, "y", [1], "m")
         end
 
-        function Philote.set_options!(discipline::ConfigurableDiscipline, options::Dict{String, <:Any})
+        function Philote.set_options!(
+            discipline::ConfigurableDiscipline, options::Dict{String, <:Any}
+        )
             if haskey(options, "scale")
                 discipline.scale = Float64(options["scale"])
             end
         end
 
-        function Philote.compute(discipline::ConfigurableDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+        function Philote.compute(
+            discipline::ConfigurableDiscipline,
+            inputs::Dict{String, <:AbstractArray{Float64}},
+        )
             return Dict("y" => [discipline.scale * inputs["x"][1]])
         end
 

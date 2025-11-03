@@ -14,10 +14,7 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
-        "Getting Started" => [
-            "MDO Concepts" => "concepts.md",
-            "Tutorial" => "tutorial.md",
-        ],
+        "Getting Started" => ["MDO Concepts" => "concepts.md", "Tutorial" => "tutorial.md"],
         "User Guide" => [
             "Explicit Disciplines" => "explicit_disciplines.md",
             "Implicit Disciplines" => "implicit_disciplines.md",

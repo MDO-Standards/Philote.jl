@@ -31,9 +31,10 @@ abstract type AbstractDiscipline end
 Base type for explicit disciplines of the form: outputs = f(inputs)
 
 Explicit disciplines must implement:
-- `setup!(discipline)` - declare inputs, outputs, options
-- `compute(discipline, inputs)` - compute outputs from inputs
-- `compute_partials(discipline, inputs)` - compute gradients (optional)
+
+  - `setup!(discipline)` - declare inputs, outputs, options
+  - `compute(discipline, inputs)` - compute outputs from inputs
+  - `compute_partials(discipline, inputs)` - compute gradients (optional)
 """
 abstract type ExplicitDiscipline <: AbstractDiscipline end
 
@@ -43,10 +44,11 @@ abstract type ExplicitDiscipline <: AbstractDiscipline end
 Base type for implicit disciplines with residual equations.
 
 Implicit disciplines must implement:
-- `setup!(discipline)` - declare inputs, outputs, residuals, options
-- `compute_residuals(discipline, inputs, outputs)` - compute residual values
-- `solve_residuals(discipline, inputs, outputs)` - solve for outputs
-- `residual_partials(discipline, inputs, outputs)` - compute Jacobian (optional)
+
+  - `setup!(discipline)` - declare inputs, outputs, residuals, options
+  - `compute_residuals(discipline, inputs, outputs)` - compute residual values
+  - `solve_residuals(discipline, inputs, outputs)` - solve for outputs
+  - `residual_partials(discipline, inputs, outputs)` - compute Jacobian (optional)
 """
 abstract type ImplicitDiscipline <: AbstractDiscipline end
 
@@ -56,13 +58,14 @@ abstract type ImplicitDiscipline <: AbstractDiscipline end
 Stores metadata about a discipline's interface and configuration.
 
 # Fields
-- `inputs`: Dictionary mapping input names to (shape, units) tuples
-- `outputs`: Dictionary mapping output names to (shape, units) tuples
-- `residuals`: Dictionary mapping residual names to (shape, units) tuples
-- `options`: Dictionary mapping option names to type strings
-- `partials`: Vector of (output, input) pairs for declared derivatives
-- `name`: Discipline name (default: "UnnamedDiscipline")
-- `version`: Discipline version (default: "0.1.0")
+
+  - `inputs`: Dictionary mapping input names to (shape, units) tuples
+  - `outputs`: Dictionary mapping output names to (shape, units) tuples
+  - `residuals`: Dictionary mapping residual names to (shape, units) tuples
+  - `options`: Dictionary mapping option names to type strings
+  - `partials`: Vector of (output, input) pairs for declared derivatives
+  - `name`: Discipline name (default: "UnnamedDiscipline")
+  - `version`: Discipline version (default: "0.1.0")
 
 This struct is managed internally by Philote. Access it via `get_metadata(discipline)`.
 """
@@ -98,13 +101,15 @@ end
 Declare an input variable for the discipline.
 
 # Arguments
-- `discipline`: The discipline instance
-- `name`: Variable name
-- `shape`: Array shape (e.g., [1] for scalar, [3, 3] for 3x3 matrix)
-- `units`: Physical units (e.g., "m", "kg", "m**2")
+
+  - `discipline`: The discipline instance
+  - `name`: Variable name
+  - `shape`: Array shape (e.g., [1] for scalar, [3, 3] for 3x3 matrix)
+  - `units`: Physical units (e.g., "m", "kg", "m**2")
 """
-function add_input!(discipline::AbstractDiscipline, name::String,
-                    shape::Vector{Int}, units::String)
+function add_input!(
+    discipline::AbstractDiscipline, name::String, shape::Vector{Int}, units::String
+)
     # Validate shape
     if any(s <= 0 for s in shape)
         throw(ArgumentError("Shape dimensions must be positive integers, got: $shape"))
@@ -125,8 +130,9 @@ end
 
 Declare an output variable for the discipline.
 """
-function add_output!(discipline::AbstractDiscipline, name::String,
-                     shape::Vector{Int}, units::String)
+function add_output!(
+    discipline::AbstractDiscipline, name::String, shape::Vector{Int}, units::String
+)
     # Validate shape
     if any(s <= 0 for s in shape)
         throw(ArgumentError("Shape dimensions must be positive integers, got: $shape"))
@@ -147,8 +153,9 @@ end
 
 Declare a residual variable for implicit disciplines.
 """
-function add_residual!(discipline::ImplicitDiscipline, name::String,
-                      shape::Vector{Int}, units::String)
+function add_residual!(
+    discipline::ImplicitDiscipline, name::String, shape::Vector{Int}, units::String
+)
     # Validate shape
     if any(s <= 0 for s in shape)
         throw(ArgumentError("Shape dimensions must be positive integers, got: $shape"))
@@ -170,9 +177,10 @@ end
 Declare a configuration option for the discipline.
 
 # Arguments
-- `discipline`: The discipline instance
-- `name`: Option name
-- `type`: Option type ("float", "int", "bool", "string")
+
+  - `discipline`: The discipline instance
+  - `name`: Option name
+  - `type`: Option type ("float", "int", "bool", "string")
 """
 function add_option!(discipline::AbstractDiscipline, name::String, type::String)
     meta = get_metadata(discipline)
@@ -197,6 +205,7 @@ Initialize the discipline by declaring all inputs, outputs, and options.
 This method must be implemented by all discipline subtypes.
 
 # Example
+
 ```julia
 function setup!(d::MyDiscipline)
     add_input!(d, "x", [1], "m")
@@ -222,10 +231,12 @@ runtime configuration. The options dictionary maps option names to values
 of various types (Float64, Int64, Bool, String).
 
 # Arguments
-- `discipline`: The discipline instance
-- `options`: Dictionary of option name => value pairs
+
+  - `discipline`: The discipline instance
+  - `options`: Dictionary of option name => value pairs
 
 # Example
+
 ```julia
 function set_options!(d::MyDiscipline, options::Dict{String, <:Any})
     if haskey(options, "tolerance")
@@ -248,13 +259,16 @@ end
 Compute outputs from inputs for an explicit discipline.
 
 # Arguments
-- `discipline`: The discipline instance
-- `inputs`: Dictionary mapping input names to arrays
+
+  - `discipline`: The discipline instance
+  - `inputs`: Dictionary mapping input names to arrays
 
 # Returns
-- Dictionary mapping output names to arrays
+
+  - Dictionary mapping output names to arrays
 
 # Example
+
 ```julia
 function compute(d::MyDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
     x = inputs["x"][1]
@@ -264,7 +278,9 @@ function compute(d::MyDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}
 end
 ```
 """
-function compute(discipline::ExplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+function compute(
+    discipline::ExplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}
+)
     error("compute must be implemented for $(typeof(discipline))")
 end
 
@@ -274,26 +290,26 @@ end
 Compute partial derivatives for an explicit discipline.
 
 # Returns
-- Nested dictionary: Dict{String, Dict{String, AbstractArray{Float64}}}
-  - First level keys are output names
-  - Second level keys are input names
-  - Values are Jacobian matrices
+
+  - Nested dictionary: Dict{String, Dict{String, AbstractArray{Float64}}}
+
+      + First level keys are output names
+      + Second level keys are input names
+      + Values are Jacobian matrices
 
 # Example
+
 ```julia
 function compute_partials(d::MyDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
     x = inputs["x"][1]
     y = inputs["y"][1]
-    return Dict(
-        "f" => Dict(
-            "x" => [2.0 * x],
-            "y" => [2.0 * y]
-        )
-    )
+    return Dict("f" => Dict("x" => [2.0 * x], "y" => [2.0 * y]))
 end
 ```
 """
-function compute_partials(discipline::ExplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+function compute_partials(
+    discipline::ExplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}
+)
     # Default: no gradients provided
     return Dict{String, Dict{String, Vector{Float64}}}()
 end
@@ -304,14 +320,20 @@ end
 Compute residual values for an implicit discipline.
 
 # Arguments
-- `discipline`: The discipline instance
-- `inputs`: Dictionary mapping input names to arrays
-- `outputs`: Dictionary mapping output names to arrays
+
+  - `discipline`: The discipline instance
+  - `inputs`: Dictionary mapping input names to arrays
+  - `outputs`: Dictionary mapping output names to arrays
 
 # Returns
-- Dictionary mapping residual names to arrays
+
+  - Dictionary mapping residual names to arrays
 """
-function compute_residuals(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}, outputs::Dict{String, <:AbstractArray{Float64}})
+function compute_residuals(
+    discipline::ImplicitDiscipline,
+    inputs::Dict{String, <:AbstractArray{Float64}},
+    outputs::Dict{String, <:AbstractArray{Float64}},
+)
     error("compute_residuals must be implemented for $(typeof(discipline))")
 end
 
@@ -321,14 +343,20 @@ end
 Solve for outputs that drive residuals to zero.
 
 # Arguments
-- `discipline`: The discipline instance
-- `inputs`: Dictionary mapping input names to arrays
-- `outputs`: Dictionary mapping output names to arrays (initial guess, updated in place)
+
+  - `discipline`: The discipline instance
+  - `inputs`: Dictionary mapping input names to arrays
+  - `outputs`: Dictionary mapping output names to arrays (initial guess, updated in place)
 
 # Returns
-- Nothing (outputs dict is modified in place)
+
+  - Nothing (outputs dict is modified in place)
 """
-function solve_residuals(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}, outputs::Dict{String, <:AbstractArray{Float64}})
+function solve_residuals(
+    discipline::ImplicitDiscipline,
+    inputs::Dict{String, <:AbstractArray{Float64}},
+    outputs::Dict{String, <:AbstractArray{Float64}},
+)
     error("solve_residuals must be implemented for $(typeof(discipline))")
 end
 
@@ -338,15 +366,21 @@ end
 Compute partial derivatives of residuals for an implicit discipline.
 
 # Arguments
-- `discipline`: The discipline instance
-- `inputs`: Dictionary mapping input names to arrays
-- `outputs`: Dictionary mapping output names to arrays
+
+  - `discipline`: The discipline instance
+  - `inputs`: Dictionary mapping input names to arrays
+  - `outputs`: Dictionary mapping output names to arrays
 
 # Returns
-- Nested dictionary: Dict{String, Dict{String, AbstractArray{Float64}}}
-  Maps (residual_name, variable_name) => Jacobian matrix
+
+  - Nested dictionary: Dict{String, Dict{String, AbstractArray{Float64}}}
+    Maps (residual_name, variable_name) => Jacobian matrix
 """
-function residual_partials(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}, outputs::Dict{String, <:AbstractArray{Float64}})
+function residual_partials(
+    discipline::ImplicitDiscipline,
+    inputs::Dict{String, <:AbstractArray{Float64}},
+    outputs::Dict{String, <:AbstractArray{Float64}},
+)
     # Default: no gradients provided
     return Dict{String, Dict{String, Vector{Float64}}}()
 end

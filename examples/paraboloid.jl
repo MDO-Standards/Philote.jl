@@ -17,8 +17,9 @@ using Philote
 Example explicit discipline computing a paraboloid function.
 
 Options:
-- scale_factor (float): Scaling factor applied to output (default: 1.0)
-- offset (float): Offset added to output (default: 0.0)
+
+  - scale_factor (float): Scaling factor applied to output (default: 1.0)
+  - offset (float): Offset added to output (default: 0.0)
 """
 mutable struct ParaboloidDiscipline <: Philote.ExplicitDiscipline
     scale_factor::Float64
@@ -62,10 +63,12 @@ end
 Compute the paraboloid function output.
 
 # Formula
+
 f(x, y) = scale_factor * [(x - 3)^2 + x*y + (y + 4)^2 - 3] + offset
 """
-function Philote.compute(discipline::ParaboloidDiscipline,
-                        inputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.compute(
+    discipline::ParaboloidDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}
+)
     # Extract scalar inputs
     x = inputs["x"][1]
     y = inputs["y"][1]
@@ -86,11 +89,13 @@ end
 Compute analytical gradients of the paraboloid function.
 
 # Derivatives
+
 ∂f/∂x = scale_factor * [2(x - 3) + y]
 ∂f/∂y = scale_factor * [2(y + 4) + x]
 """
-function Philote.compute_partials(discipline::ParaboloidDiscipline,
-                                  inputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.compute_partials(
+    discipline::ParaboloidDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}
+)
     # Extract scalar inputs
     x = inputs["x"][1]
     y = inputs["y"][1]
@@ -100,12 +105,7 @@ function Philote.compute_partials(discipline::ParaboloidDiscipline,
     df_dy = discipline.scale_factor * (2.0 * (y + 4.0) + x)
 
     # Return as nested dictionary
-    return Dict(
-        "f_xy" => Dict(
-            "x" => [df_dx],
-            "y" => [df_dy]
-        )
-    )
+    return Dict("f_xy" => Dict("x" => [df_dx], "y" => [df_dy]))
 end
 
 """
@@ -113,7 +113,9 @@ end
 
 Set discipline options from a dictionary.
 """
-function Philote.set_options!(discipline::ParaboloidDiscipline, options::Dict{String, <:Any})
+function Philote.set_options!(
+    discipline::ParaboloidDiscipline, options::Dict{String, <:Any}
+)
     if haskey(options, "scale_factor")
         discipline.scale_factor = Float64(options["scale_factor"])
     end
@@ -161,7 +163,9 @@ if abspath(PROGRAM_FILE) == @__FILE__
     println("Output: f_xy=$(outputs["f_xy"][1])")
 
     partials = Philote.compute_partials(discipline, inputs)
-    println("Gradient: ∂f/∂x=$(partials["f_xy"]["x"][1]), ∂f/∂y=$(partials["f_xy"]["y"][1])")
+    println(
+        "Gradient: ∂f/∂x=$(partials["f_xy"]["x"][1]), ∂f/∂y=$(partials["f_xy"]["y"][1])"
+    )
 
     # Test with options
     println("\n" * "=" ^ 50)
@@ -175,5 +179,7 @@ if abspath(PROGRAM_FILE) == @__FILE__
     println("Output: f_xy=$(outputs["f_xy"][1])")
 
     partials = Philote.compute_partials(discipline, inputs)
-    println("Gradient: ∂f/∂x=$(partials["f_xy"]["x"][1]), ∂f/∂y=$(partials["f_xy"]["y"][1])")
+    println(
+        "Gradient: ∂f/∂x=$(partials["f_xy"]["x"][1]), ∂f/∂y=$(partials["f_xy"]["y"][1])"
+    )
 end
