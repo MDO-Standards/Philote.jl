@@ -4,11 +4,11 @@ using Philote
 makedocs(;
     modules=[Philote],
     authors="Christopher Lupp",
-    repo="https://github.com/MDO-Standards/Philote-Julia/blob/{commit}{path}#{line}",
+    repo="https://github.com/MDO-Standards/Philote.jl/blob/{commit}{path}#{line}",
     sitename="Philote.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://MDO-Standards.github.io/Philote-Julia",
+        canonical="https://MDO-Standards.github.io/Philote.jl",
         assets=String[],
         edit_link="main",
     ),
@@ -29,6 +29,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/MDO-Standards/Philote-Julia",
+    repo="github.com/MDO-Standards/Philote.jl",
     devbranch="main",
 )
