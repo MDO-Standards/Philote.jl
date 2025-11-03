@@ -10,7 +10,7 @@ Philote is an ecosystem of tools for building and connecting MDO disciplines acr
 - **Philote-Python**: Python library that wraps and serves Julia disciplines via gRPC
 - **Philote-Cpp**: Protocol buffer definitions for language-agnostic communication
 
-Together, these components enable you to write high-performance analysis code in Julia and integrate it seamlessly with MDO frameworks like OpenMDAO.
+Together, these components enable you to write high-performance analysis code in Julia and integrate it seamlessly with MDO frameworks using a Philote client library.
 
 ## Features
 
