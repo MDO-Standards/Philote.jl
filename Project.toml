@@ -1,12 +1,16 @@
 name = "Philote"
-uuid = "8b8e1234-5678-90ab-cdef-123456789abc"
+uuid = "b1df2f05-6566-432e-bbeb-89bf4b62cd85"
 authors = ["Christopher Lupp"]
 version = "0.1.0"
+description = "Julia interface for defining MDO (Multidisciplinary Design Optimization) disciplines using the Philote framework"
+license = "Apache-2.0"
+repository = "https://github.com/MDO-Standards/Philote-Julia.git"
+keywords = ["MDO", "multidisciplinary", "optimization", "engineering", "design"]
 
 [deps]
 
 [compat]
-julia = "1.6"
+julia = "1.6, 1.7, 1.8, 1.9, 1.10, 1.11"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
