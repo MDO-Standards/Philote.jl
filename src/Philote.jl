@@ -89,8 +89,19 @@ Declare an input variable for the discipline.
 - `units`: Physical units (e.g., "m", "kg", "m**2")
 """
 function add_input!(discipline::AbstractDiscipline, name::String,
-                    shape::Vector{Int64}, units::String)
+                    shape::Vector{Int}, units::String)
+    # Validate shape
+    if any(s <= 0 for s in shape)
+        throw(ArgumentError("Shape dimensions must be positive integers, got: $shape"))
+    end
+
     meta = get_metadata(discipline)
+
+    # Check for duplicate names
+    if haskey(meta.inputs, name)
+        @warn "Input '$name' already declared, overwriting previous definition"
+    end
+
     meta.inputs[name] = (shape, units)
 end
 
@@ -100,8 +111,19 @@ end
 Declare an output variable for the discipline.
 """
 function add_output!(discipline::AbstractDiscipline, name::String,
-                     shape::Vector{Int64}, units::String)
+                     shape::Vector{Int}, units::String)
+    # Validate shape
+    if any(s <= 0 for s in shape)
+        throw(ArgumentError("Shape dimensions must be positive integers, got: $shape"))
+    end
+
     meta = get_metadata(discipline)
+
+    # Check for duplicate names
+    if haskey(meta.outputs, name)
+        @warn "Output '$name' already declared, overwriting previous definition"
+    end
+
     meta.outputs[name] = (shape, units)
 end
 
@@ -111,8 +133,19 @@ end
 Declare a residual variable for implicit disciplines.
 """
 function add_residual!(discipline::ImplicitDiscipline, name::String,
-                      shape::Vector{Int64}, units::String)
+                      shape::Vector{Int}, units::String)
+    # Validate shape
+    if any(s <= 0 for s in shape)
+        throw(ArgumentError("Shape dimensions must be positive integers, got: $shape"))
+    end
+
     meta = get_metadata(discipline)
+
+    # Check for duplicate names
+    if haskey(meta.residuals, name)
+        @warn "Residual '$name' already declared, overwriting previous definition"
+    end
+
     meta.residuals[name] = (shape, units)
 end
 

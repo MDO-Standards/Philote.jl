@@ -144,4 +144,157 @@ end
         @test partials["r"]["b"][1,1] ≈ -1.0
         @test partials["r"]["x"][1,1] ≈ 2.0
     end
+
+    @testset "Input Validation" begin
+        disc = TestExplicitDiscipline()
+
+        # Test invalid shape dimensions (non-positive values)
+        @test_throws ArgumentError Philote.add_input!(disc, "bad", [0], "m")
+        @test_throws ArgumentError Philote.add_input!(disc, "bad", [-1], "m")
+        @test_throws ArgumentError Philote.add_input!(disc, "bad", [1, 0, 1], "m")
+
+        @test_throws ArgumentError Philote.add_output!(disc, "bad", [0], "m")
+        @test_throws ArgumentError Philote.add_output!(disc, "bad", [-5], "m")
+
+        # Test that positive shapes work
+        @test_nowarn Philote.add_input!(disc, "good", [1], "m")
+        @test_nowarn Philote.add_input!(disc, "multi", [2, 3], "m")
+        @test_nowarn Philote.add_output!(disc, "out", [10, 20, 30], "m^3")
+    end
+
+    @testset "Metadata Edge Cases" begin
+        disc = TestExplicitDiscipline()
+
+        # Test metadata before setup
+        metadata = Philote.get_metadata(disc)
+        @test metadata.name == "UnnamedDiscipline"
+        @test isempty(metadata.inputs)
+        @test isempty(metadata.outputs)
+
+        # Test metadata shapes and units
+        Philote.add_input!(disc, "vec", [3], "kg")
+        Philote.add_output!(disc, "matrix", [2, 2], "N")
+        metadata = Philote.get_metadata(disc)
+
+        @test metadata.inputs["vec"] == ([3], "kg")
+        @test metadata.outputs["matrix"] == ([2, 2], "N")
+    end
+
+    @testset "Multi-dimensional Arrays" begin
+        mutable struct VectorDiscipline <: Philote.ExplicitDiscipline
+            VectorDiscipline() = new()
+        end
+
+        function Philote.setup!(discipline::VectorDiscipline)
+            Philote.add_input!(discipline, "vec", [3], "m")
+            Philote.add_output!(discipline, "norm", [1], "m")
+        end
+
+        function Philote.compute(discipline::VectorDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+            vec = inputs["vec"]
+            norm_val = sqrt(sum(vec.^2))
+            return Dict("norm" => [norm_val])
+        end
+
+        disc = VectorDiscipline()
+        Philote.setup!(disc)
+
+        inputs = Dict("vec" => [3.0, 4.0, 0.0])
+        outputs = Philote.compute(disc, inputs)
+        @test outputs["norm"][1] ≈ 5.0
+    end
+
+    @testset "Example Integration Tests" begin
+        # Test paraboloid example
+        include("../examples/paraboloid.jl")
+
+        paraboloid = ParaboloidDiscipline()
+        Philote.setup!(paraboloid)
+
+        # Test metadata
+        meta = Philote.get_metadata(paraboloid)
+        @test meta.name == "ParaboloidDiscipline"
+        @test haskey(meta.inputs, "x")
+        @test haskey(meta.inputs, "y")
+        @test haskey(meta.outputs, "f_xy")
+
+        # Test compute
+        inputs = Dict("x" => [0.0], "y" => [0.0])
+        outputs = Philote.compute(paraboloid, inputs)
+        expected = (0.0 - 3.0)^2 + 0.0 * 0.0 + (0.0 + 4.0)^2 - 3.0
+        @test outputs["f_xy"][1] ≈ expected
+
+        # Test partials
+        partials = Philote.compute_partials(paraboloid, inputs)
+        @test haskey(partials["f_xy"], "x")
+        @test haskey(partials["f_xy"], "y")
+
+        # Test quadratic example
+        include("../examples/quadratic.jl")
+
+        quadratic = QuadraticImplicitDiscipline()
+        Philote.setup!(quadratic)
+
+        # Test metadata
+        meta = Philote.get_metadata(quadratic)
+        @test meta.name == "QuadraticImplicitDiscipline"
+        @test haskey(meta.inputs, "a")
+        @test haskey(meta.inputs, "b")
+        @test haskey(meta.inputs, "c")
+        @test haskey(meta.outputs, "x")
+        @test haskey(meta.residuals, "R")
+
+        # Test solve: x² - 5x + 6 = 0 (solutions: 2 or 3)
+        inputs = Dict("a" => [1.0], "b" => [-5.0], "c" => [6.0])
+        outputs = Dict("x" => [0.0])
+        Philote.solve_residuals(quadratic, inputs, outputs)
+
+        # Should find one of the two roots
+        x_sol = outputs["x"][1]
+        @test x_sol ≈ 3.0 || x_sol ≈ 2.0
+
+        # Verify residual is near zero
+        residuals = Philote.compute_residuals(quadratic, inputs, outputs)
+        @test abs(residuals["R"][1]) < 1e-10
+    end
+
+    @testset "Options and Configuration" begin
+        mutable struct ConfigurableDiscipline <: Philote.ExplicitDiscipline
+            scale::Float64
+            ConfigurableDiscipline() = new(1.0)
+        end
+
+        function Philote.setup!(discipline::ConfigurableDiscipline)
+            Philote.add_option!(discipline, "scale", "float")
+            Philote.add_input!(discipline, "x", [1], "m")
+            Philote.add_output!(discipline, "y", [1], "m")
+        end
+
+        function Philote.set_options!(discipline::ConfigurableDiscipline, options::Dict{String, <:Any})
+            if haskey(options, "scale")
+                discipline.scale = Float64(options["scale"])
+            end
+        end
+
+        function Philote.compute(discipline::ConfigurableDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+            return Dict("y" => [discipline.scale * inputs["x"][1]])
+        end
+
+        disc = ConfigurableDiscipline()
+        Philote.setup!(disc)
+
+        meta = Philote.get_metadata(disc)
+        @test haskey(meta.options, "scale")
+
+        # Test with default scale
+        @test disc.scale == 1.0
+        outputs = Philote.compute(disc, Dict("x" => [5.0]))
+        @test outputs["y"][1] ≈ 5.0
+
+        # Test with modified scale
+        Philote.set_options!(disc, Dict("scale" => 2.5))
+        @test disc.scale == 2.5
+        outputs = Philote.compute(disc, Dict("x" => [5.0]))
+        @test outputs["y"][1] ≈ 12.5
+    end
 end
