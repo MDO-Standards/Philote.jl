@@ -1,0 +1,54 @@
+name: Lint
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1'
+      - uses: julia-actions/cache@v2
+      - name: Install JuliaFormatter
+        run: |
+          julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
+      - name: Check code formatting
+        run: |
+          julia -e 'using JuliaFormatter; exit(format(".", verbose=true, overwrite=false) ? 0 : 1)'
+
+  lint-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1'
+      - uses: julia-actions/cache@v2
+      - name: Install Lint
+        run: |
+          julia -e 'using Pkg; Pkg.add("Lint")'
+      - name: Run Lint.jl
+        run: |
+          julia -e '
+          using Lint
+          results = lintpkg("Philote")
+          if !isempty(results)
+            for (file, msgs) in results
+              println("File: ", file)
+              for msg in msgs
+                println("  ", msg)
+              end
+            end
+            exit(1)
+          end
+          '
