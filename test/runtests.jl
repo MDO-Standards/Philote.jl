@@ -1,6 +1,74 @@
 using Test
 using Philote
 
+# Define test disciplines at module scope so methods are visible to Philote
+mutable struct TestExplicitDiscipline <: Philote.ExplicitDiscipline
+    TestExplicitDiscipline() = new()
+end
+
+function Philote.setup!(discipline::TestExplicitDiscipline)
+    Philote.add_input!(discipline, "x", [1], "m")
+    Philote.add_output!(discipline, "y", [1], "m^2")
+    Philote.declare_partials!(discipline, "y", "x")
+end
+
+function Philote.compute(discipline::TestExplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+    x = inputs["x"][1]
+    return Dict("y" => [x^2])
+end
+
+function Philote.compute_partials(discipline::TestExplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+    x = inputs["x"][1]
+    return Dict("y" => Dict("x" => reshape([2*x], 1, 1)))
+end
+
+mutable struct TestImplicitDiscipline <: Philote.ImplicitDiscipline
+    TestImplicitDiscipline() = new()
+end
+
+function Philote.setup!(discipline::TestImplicitDiscipline)
+    Philote.add_input!(discipline, "a", [1], "unitless")
+    Philote.add_input!(discipline, "b", [1], "unitless")
+    Philote.add_output!(discipline, "x", [1], "unitless")
+    Philote.add_residual!(discipline, "r", [1], "unitless")
+    Philote.declare_partials!(discipline, "r", "a")
+    Philote.declare_partials!(discipline, "r", "b")
+    Philote.declare_partials!(discipline, "r", "x")
+end
+
+function Philote.compute_residuals(discipline::TestImplicitDiscipline,
+                                  inputs::Dict{String, <:AbstractArray{Float64}},
+                                  outputs::Dict{String, <:AbstractArray{Float64}})
+    a = inputs["a"][1]
+    b = inputs["b"][1]
+    x = outputs["x"][1]
+    r = a * x - b
+    return Dict("r" => [r])
+end
+
+function Philote.solve_residuals(discipline::TestImplicitDiscipline,
+                                inputs::Dict{String, <:AbstractArray{Float64}},
+                                outputs::Dict{String, <:AbstractArray{Float64}})
+    a = inputs["a"][1]
+    b = inputs["b"][1]
+    x = b / a
+    outputs["x"][1] = x
+end
+
+function Philote.residual_partials(discipline::TestImplicitDiscipline,
+                                  inputs::Dict{String, <:AbstractArray{Float64}},
+                                  outputs::Dict{String, <:AbstractArray{Float64}})
+    a = inputs["a"][1]
+    x = outputs["x"][1]
+    return Dict(
+        "r" => Dict(
+            "a" => reshape([x], 1, 1),
+            "b" => reshape([-1.0], 1, 1),
+            "x" => reshape([a], 1, 1)
+        )
+    )
+end
+
 @testset "Philote.jl" begin
     @testset "Module exports" begin
         @test isdefined(Philote, :AbstractDiscipline)
@@ -20,27 +88,6 @@ using Philote
     end
 
     @testset "Simple Explicit Discipline" begin
-        # Define a simple test discipline
-        mutable struct TestExplicitDiscipline <: Philote.ExplicitDiscipline
-            TestExplicitDiscipline() = new()
-        end
-
-        function Philote.setup!(discipline::TestExplicitDiscipline)
-            Philote.add_input!(discipline, "x", [1], "m")
-            Philote.add_output!(discipline, "y", [1], "m^2")
-            Philote.declare_partials!(discipline, "y", "x")
-        end
-
-        function Philote.compute(discipline::TestExplicitDiscipline, inputs::Dict{String,Array})
-            x = inputs["x"][1]
-            return Dict("y" => [x^2])
-        end
-
-        function Philote.compute_partials(discipline::TestExplicitDiscipline, inputs::Dict{String,Array})
-            x = inputs["x"][1]
-            return Dict("y" => Dict("x" => reshape([2*x], 1, 1)))
-        end
-
         # Test discipline instantiation
         disc = TestExplicitDiscipline()
         @test disc isa Philote.ExplicitDiscipline
@@ -49,7 +96,7 @@ using Philote
         # Test setup
         Philote.setup!(disc)
         metadata = Philote.get_metadata(disc)
-        @test metadata.name == "TestExplicitDiscipline"
+        @test metadata.name == "UnnamedDiscipline"  # Default name
         @test haskey(metadata.inputs, "x")
         @test haskey(metadata.outputs, "y")
         @test ("y", "x") in metadata.partials
@@ -65,54 +112,6 @@ using Philote
     end
 
     @testset "Simple Implicit Discipline" begin
-        # Define a simple implicit test discipline (linear equation: a*x = b)
-        mutable struct TestImplicitDiscipline <: Philote.ImplicitDiscipline
-            TestImplicitDiscipline() = new()
-        end
-
-        function Philote.setup!(discipline::TestImplicitDiscipline)
-            Philote.add_input!(discipline, "a", [1], "unitless")
-            Philote.add_input!(discipline, "b", [1], "unitless")
-            Philote.add_output!(discipline, "x", [1], "unitless")
-            Philote.add_residual!(discipline, "r", [1], "unitless")
-            Philote.declare_partials!(discipline, "r", "a")
-            Philote.declare_partials!(discipline, "r", "b")
-            Philote.declare_partials!(discipline, "r", "x")
-        end
-
-        function Philote.compute_residuals(discipline::TestImplicitDiscipline,
-                                          inputs::Dict{String,Array},
-                                          outputs::Dict{String,Array})
-            a = inputs["a"][1]
-            b = inputs["b"][1]
-            x = outputs["x"][1]
-            r = a * x - b
-            return Dict("r" => [r])
-        end
-
-        function Philote.solve_residuals(discipline::TestImplicitDiscipline,
-                                        inputs::Dict{String,Array},
-                                        outputs::Dict{String,Array})
-            a = inputs["a"][1]
-            b = inputs["b"][1]
-            x = b / a
-            outputs["x"][1] = x
-        end
-
-        function Philote.residual_partials(discipline::TestImplicitDiscipline,
-                                          inputs::Dict{String,Array},
-                                          outputs::Dict{String,Array})
-            a = inputs["a"][1]
-            x = outputs["x"][1]
-            return Dict(
-                "r" => Dict(
-                    "a" => reshape([x], 1, 1),
-                    "b" => reshape([-1.0], 1, 1),
-                    "x" => reshape([a], 1, 1)
-                )
-            )
-        end
-
         # Test discipline instantiation
         disc = TestImplicitDiscipline()
         @test disc isa Philote.ImplicitDiscipline
@@ -121,7 +120,7 @@ using Philote
         # Test setup
         Philote.setup!(disc)
         metadata = Philote.get_metadata(disc)
-        @test metadata.name == "TestImplicitDiscipline"
+        @test metadata.name == "UnnamedDiscipline"  # Default name
         @test haskey(metadata.inputs, "a")
         @test haskey(metadata.inputs, "b")
         @test haskey(metadata.outputs, "x")
