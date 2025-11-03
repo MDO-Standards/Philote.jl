@@ -13,7 +13,7 @@ export AbstractDiscipline, ExplicitDiscipline, ImplicitDiscipline
 export setup!, set_options!, compute, compute_partials
 export add_input!, add_output!, add_option!, declare_partials!, add_residual!
 export get_metadata
-export compute_residuals, solve_residuals, compute_residual_partials
+export compute_residuals, solve_residuals, residual_partials
 
 """
     AbstractDiscipline
@@ -44,9 +44,9 @@ Base type for implicit disciplines with residual equations.
 
 Implicit disciplines must implement:
 - `setup!(discipline)` - declare inputs, outputs, residuals, options
-- `compute_residuals(discipline, inputs)` - compute residual values
-- `solve_residuals(discipline, inputs)` - solve for outputs
-- `compute_residual_partials(discipline, inputs)` - compute Jacobian (optional)
+- `compute_residuals(discipline, inputs, outputs)` - compute residual values
+- `solve_residuals(discipline, inputs, outputs)` - solve for outputs
+- `residual_partials(discipline, inputs, outputs)` - compute Jacobian (optional)
 """
 abstract type ImplicitDiscipline <: AbstractDiscipline end
 
@@ -263,38 +263,54 @@ function compute_partials(discipline::ExplicitDiscipline, inputs::Dict{String, <
 end
 
 """
-    compute_residuals(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+    compute_residuals(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}, outputs::Dict{String, <:AbstractArray{Float64}})
 
 Compute residual values for an implicit discipline.
+
+# Arguments
+- `discipline`: The discipline instance
+- `inputs`: Dictionary mapping input names to arrays
+- `outputs`: Dictionary mapping output names to arrays
 
 # Returns
 - Dictionary mapping residual names to arrays
 """
-function compute_residuals(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+function compute_residuals(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}, outputs::Dict{String, <:AbstractArray{Float64}})
     error("compute_residuals must be implemented for $(typeof(discipline))")
 end
 
 """
-    solve_residuals(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+    solve_residuals(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}, outputs::Dict{String, <:AbstractArray{Float64}})
 
 Solve for outputs that drive residuals to zero.
 
+# Arguments
+- `discipline`: The discipline instance
+- `inputs`: Dictionary mapping input names to arrays
+- `outputs`: Dictionary mapping output names to arrays (initial guess, updated in place)
+
 # Returns
-- Dictionary mapping output names to arrays
+- Nothing (outputs dict is modified in place)
 """
-function solve_residuals(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+function solve_residuals(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}, outputs::Dict{String, <:AbstractArray{Float64}})
     error("solve_residuals must be implemented for $(typeof(discipline))")
 end
 
 """
-    compute_residual_partials(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+    residual_partials(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}, outputs::Dict{String, <:AbstractArray{Float64}})
 
 Compute partial derivatives of residuals for an implicit discipline.
 
+# Arguments
+- `discipline`: The discipline instance
+- `inputs`: Dictionary mapping input names to arrays
+- `outputs`: Dictionary mapping output names to arrays
+
 # Returns
 - Nested dictionary: Dict{String, Dict{String, AbstractArray{Float64}}}
+  Maps (residual_name, variable_name) => Jacobian matrix
 """
-function compute_residual_partials(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}})
+function residual_partials(discipline::ImplicitDiscipline, inputs::Dict{String, <:AbstractArray{Float64}}, outputs::Dict{String, <:AbstractArray{Float64}})
     # Default: no gradients provided
     return Dict{String, Dict{String, Vector{Float64}}}()
 end
