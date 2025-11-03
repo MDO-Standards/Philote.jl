@@ -6,7 +6,7 @@ This directory contains example implementations of Philote disciplines in Julia.
 
 ### paraboloid.jl - Explicit Discipline
 
-A simple explicit discipline that computes a paraboloid function: `f(x, y) = (x-3)^2 + x*y + (y+4)^2`
+A simple explicit discipline that computes a paraboloid function: `f(x, y) = (x-3)^2 + x*y + (y+4)^2 - 3`
 
 **Type**: Explicit discipline (outputs = f(inputs))
 
