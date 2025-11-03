@@ -1,6 +1,6 @@
 name = "Philote"
 uuid = "8b8e1234-5678-90ab-cdef-123456789abc"
-authors = ["Your Name"]
+authors = ["Christopher Lupp"]
 version = "0.1.0"
 
 [deps]
