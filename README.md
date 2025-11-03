@@ -19,7 +19,7 @@ using Pkg
 Pkg.develop(path="/path/to/Philote-Julia")
 ```
 
-### From Git (Future)
+### From Git
 
 Once published or made available via Git:
 
