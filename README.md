@@ -162,19 +162,103 @@ function Philote.compute_partials(discipline::ParaboloidDiscipline, inputs::Dict
 end
 ```
 
+### Implicit Disciplines
+
+Implicit disciplines solve residual equations where outputs must satisfy: `residuals(inputs, outputs) = 0`.
+
+```julia
+mutable struct QuadraticDiscipline <: Philote.ImplicitDiscipline
+    tolerance::Float64
+
+    function QuadraticDiscipline()
+        new(1e-10)
+    end
+end
+
+function Philote.setup!(discipline::QuadraticDiscipline)
+    # Inputs (coefficients)
+    Philote.add_input!(discipline, "a", [1], "unitless")
+    Philote.add_input!(discipline, "b", [1], "unitless")
+    Philote.add_input!(discipline, "c", [1], "unitless")
+
+    # Output (solution)
+    Philote.add_output!(discipline, "x", [1], "unitless")
+
+    # Residual (r = a*x^2 + b*x + c)
+    Philote.add_residual!(discipline, "r", [1], "unitless")
+
+    # Declare partials
+    Philote.declare_partials!(discipline, "r", "a")
+    Philote.declare_partials!(discipline, "r", "b")
+    Philote.declare_partials!(discipline, "r", "c")
+    Philote.declare_partials!(discipline, "r", "x")
+end
+
+function Philote.compute_residuals(discipline::QuadraticDiscipline,
+                                   inputs::Dict{String,Array},
+                                   outputs::Dict{String,Array})
+    a = inputs["a"][1]
+    b = inputs["b"][1]
+    c = inputs["c"][1]
+    x = outputs["x"][1]
+
+    r = a * x^2 + b * x + c
+    return Dict("r" => [r])
+end
+
+function Philote.solve_residuals(discipline::QuadraticDiscipline,
+                                 inputs::Dict{String,Array},
+                                 outputs::Dict{String,Array})
+    a = inputs["a"][1]
+    b = inputs["b"][1]
+    c = inputs["c"][1]
+
+    # Solve using quadratic formula
+    discriminant = b^2 - 4*a*c
+    x = (-b + sqrt(discriminant)) / (2*a)
+
+    # Update output in place
+    outputs["x"][1] = x
+end
+
+function Philote.residual_partials(discipline::QuadraticDiscipline,
+                                   inputs::Dict{String,Array},
+                                   outputs::Dict{String,Array})
+    a = inputs["a"][1]
+    b = inputs["b"][1]
+    x = outputs["x"][1]
+
+    return Dict(
+        "r" => Dict(
+            "a" => reshape([x^2], 1, 1),
+            "b" => reshape([x], 1, 1),
+            "c" => reshape([1.0], 1, 1),
+            "x" => reshape([2*a*x + b], 1, 1)
+        )
+    )
+end
+```
+
 ### Required Methods
 
-Every discipline must implement:
+**Explicit disciplines** must implement:
 
 1. `Philote.setup!(discipline)` - Declare inputs, outputs, and partials
 2. `Philote.compute(discipline, inputs)` - Compute outputs from inputs
 
-Optional methods:
+**Implicit disciplines** must implement:
 
-3. `Philote.compute_partials(discipline, inputs)` - Compute gradients (if `provides_gradients = true`)
-4. `Philote.set_options!(discipline, options)` - Set discipline options from config
+1. `Philote.setup!(discipline)` - Declare inputs, outputs, residuals, and partials
+2. `Philote.compute_residuals(discipline, inputs, outputs)` - Compute residual values
+3. `Philote.solve_residuals(discipline, inputs, outputs)` - Solve for outputs that drive residuals to zero
 
-See `examples/paraboloid.jl` for a complete example.
+Optional methods (both discipline types):
+
+- `Philote.compute_partials(discipline, inputs)` - Compute gradients for explicit disciplines
+- `Philote.residual_partials(discipline, inputs, outputs)` - Compute Jacobian for implicit disciplines
+- `Philote.set_options!(discipline, options)` - Set discipline options from config
+
+See `examples/paraboloid.jl` and `examples/quadratic.jl` for complete examples.
 
 ## Configuration Files
 
@@ -250,17 +334,20 @@ Philote-Julia/
 ├── philote_julia/           # Python package
 │   ├── __init__.py
 │   ├── config.py            # YAML configuration loading
-│   ├── wrapper_discipline.py # Julia wrapper discipline
+│   ├── wrapper_discipline.py # Julia wrapper disciplines (explicit & implicit)
 │   ├── cli.py               # Command-line interface
 │   └── servers/
 │       ├── __init__.py
-│       └── explicit.py      # Explicit discipline server
+│       ├── explicit.py      # Explicit discipline server
+│       └── implicit.py      # Implicit discipline server
 ├── src/
 │   └── Philote.jl           # Pure Julia interface
 ├── examples/
-│   ├── paraboloid.jl        # Example discipline
+│   ├── paraboloid.jl        # Example explicit discipline
+│   ├── quadratic.jl         # Example implicit discipline
 │   └── configs/
-│       ├── paraboloid.yaml  # Example config
+│       ├── paraboloid.yaml  # Explicit config example
+│       ├── quadratic.yaml   # Implicit config example
 │       └── README.md        # Config documentation
 ├── bin/
 │   └── philote-julia-serve  # Executable entry point
@@ -280,7 +367,7 @@ Philote-Julia/
 
 - Verify the Julia type name matches exactly (case-sensitive)
 - Check that your Julia file is syntactically correct
-- Ensure the Julia type extends `AbstractDiscipline` or `ExplicitDiscipline`
+- Ensure the Julia type extends `ExplicitDiscipline` or `ImplicitDiscipline`
 
 ### Server Won't Start
 
@@ -298,9 +385,9 @@ Philote-Julia/
 
 The implementation uses a multi-layer architecture:
 
-1. **Julia Layer**: Pure Julia disciplines implementing the Philote.jl interface
-2. **Python Wrapper**: `JuliaWrapperDiscipline` loads Julia code via juliacall and presents a Python discipline interface
-3. **gRPC Server**: Philote-Python's `ExplicitServer` hosts the wrapped discipline
+1. **Julia Layer**: Pure Julia disciplines implementing the Philote.jl interface (explicit or implicit)
+2. **Python Wrapper**: `JuliaWrapperDiscipline` or `JuliaImplicitWrapperDiscipline` loads Julia code via juliacall
+3. **gRPC Server**: Philote-Python's `ExplicitServer` or `ImplicitServer` hosts the wrapped discipline
 4. **Protocol**: Standard Philote gRPC protocol for MDO
 
 Data flow:
@@ -354,10 +441,10 @@ Contributions are welcome! Please ensure:
 - ✅ YAML-based configuration
 - ✅ Command-line server tool
 - ✅ Explicit disciplines
-- ✅ Gradient computation
+- ✅ Implicit disciplines
+- ✅ Gradient computation (both explicit and implicit)
 
 **Future Work**:
-- ⏳ Implicit discipline support
 - ⏳ Comprehensive test suite
 - ⏳ Performance benchmarks
 - ⏳ Additional examples
