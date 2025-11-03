@@ -1,11 +1,13 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: "If you use this software, please cite the conference paper."
 type: software
 title: "Philote.jl: Julia Interface for MDO Disciplines"
 abstract: "Pure Julia interface for implementing Philote MDO (Multidisciplinary Design Optimization) disciplines with support for both explicit and implicit formulations."
 authors:
   - family-names: "Lupp"
-    given-names: "Christopher"
+    given-names: "Christopher A."
+  - family-names: "Xu"
+    given-names: "Alexander"
 repository-code: "https://github.com/MDO-Standards/Philote-Julia"
 url: "https://github.com/MDO-Standards/Philote-Julia"
 license: Apache-2.0
@@ -18,3 +20,16 @@ keywords:
   - "engineering"
   - "Julia"
   - "disciplines"
+preferred-citation:
+  type: conference-paper
+  title: "Creating a Universal Communication Standard to Enable Heterogeneous Multidisciplinary Design Optimization"
+  authors:
+    - family-names: "Lupp"
+      given-names: "Christopher A."
+    - family-names: "Xu"
+      given-names: "Alexander"
+  collection-title: "AIAA SCITECH 2024 Forum"
+  start: 1
+  end: 22
+  year: 2024
+  doi: "10.2514/6.2024-1799"
