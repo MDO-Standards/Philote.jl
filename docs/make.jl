@@ -27,8 +27,3 @@ makedocs(;
     ],
     checkdocs=:none,  # Don't check for missing docstrings
 )
-
-deploydocs(;
-    repo="github.com/MDO-Standards/Philote.jl",
-    devbranch="main",
-)
