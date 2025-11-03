@@ -301,11 +301,12 @@ Apache License 2.0 - See LICENSE file for details
 
 If you use Philote.jl in your research, please cite:
 
-```bibtex
-@software{philote_julia,
-  title = {Philote.jl: Julia Interface for MDO Disciplines},
-  author = {Lupp, Christopher},
-  year = {2024},
-  url = {https://github.com/yourusername/Philote.jl}
+```
+@inproceedings{PhilotePaper,
+author = {Christopher A. Lupp and Alexander Xu},
+title = {Creating a Universal Communication Standard to Enable Heterogeneous Multidisciplinary Design Optimization},
+booktitle = {AIAA SCITECH 2024 Forum},
+pages = {1--22},
+doi = {10.2514/6.2024-1799},
 }
 ```
