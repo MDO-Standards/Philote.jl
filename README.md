@@ -1,443 +1,364 @@
 # Philote-Julia
 
-Julia interface for creating Philote MDO (Multidisciplinary Design Optimization) disciplines.
+Python wrapper for hosting Julia disciplines in the Philote MDO (Multidisciplinary Design Optimization) framework.
 
 ## Overview
 
-This library provides tools for creating analysis servers to host disciplines written in Julia. It works in conjunction with [Philote-Cpp](../Philote-Cpp) to enable Julia functions to be wrapped and served via gRPC using the Philote protocol.
+Philote-Julia enables you to write high-performance analysis disciplines in pure Julia and serve them via gRPC using the Philote protocol. This allows Julia code to seamlessly integrate with MDO frameworks and other Philote clients written in Python, C++, or any other language.
 
 ## Architecture
 
-The Philote-Julia library uses a hybrid approach:
+The Philote-Julia library uses a Python wrapper approach:
 
-- **Julia Interface** (this library): Defines the discipline interface and provides utilities for implementing disciplines in Julia
-- **C++ Wrapper** (in Philote-Cpp): Embeds the Julia runtime and wraps Julia disciplines as Philote gRPC servers
+- **Pure Julia Interface** (src/Philote.jl): Defines the discipline interface for implementing disciplines in Julia
+- **Python Wrapper** (philote_julia/): Uses `juliacall` to load Julia code and wrap it as a Python Philote discipline
+- **Python gRPC Server** (from Philote-Python): Hosts the wrapped discipline using proven server infrastructure
+- **YAML Configuration**: No-code interface for deploying Julia disciplines
 
 This approach leverages:
-- ✓ Existing stable Philote-Cpp infrastructure (gRPC, Protocol Buffers)
-- ✓ Julia's high-level syntax for implementing disciplines
+- ✓ Pure Julia for modeling (no C++ bindings required)
+- ✓ Proven Philote-Python gRPC server infrastructure
+- ✓ Zero-copy data transfer via juliacall
 - ✓ Full Philote protocol compatibility
-- ✓ Minimal dependencies (just Julia base runtime)
+- ✓ Simple YAML-based deployment
 
 ## Installation
 
-1. Clone this repository:
+### Prerequisites
+- Python 3.7+
+- Julia 1.6+
+- Access to Philote-Python (in `~/tools/Philote/Philote-Python` or in PYTHONPATH)
+
+### Install Philote-Julia
+
 ```bash
-git clone https://github.com/yourusername/Philote-Julia.git
 cd Philote-Julia
+pip install -e .
 ```
 
-2. Activate the Julia environment:
-```julia
-using Pkg
-Pkg.activate(".")
-Pkg.instantiate()
-```
+This installs the `philote-julia-serve` command and all dependencies.
 
-## Creating a Discipline
+## Quick Start
 
-### 1. Define Your Discipline Type
+### 1. Write a Julia Discipline
 
-Subtype either `ExplicitDiscipline` or `ImplicitDiscipline`:
+Create a Julia file (e.g., `my_discipline.jl`):
 
 ```julia
 using Philote
 
 mutable struct MyDiscipline <: Philote.ExplicitDiscipline
-    # Add discipline-specific fields
-    scale_factor::Float64
-
     function MyDiscipline()
-        new(1.0)
+        new()
     end
 end
-```
 
-### 2. Implement `setup!`
-
-Declare inputs, outputs, options, and partials:
-
-```julia
 function Philote.setup!(discipline::MyDiscipline)
-    # Declare options
-    Philote.add_option!(discipline, "scale_factor", "float")
+    # Define inputs and outputs
+    Philote.add_input!(discipline, "x", [1], "m")
+    Philote.add_output!(discipline, "y", [1], "m^2")
 
-    # Declare inputs
-    Philote.add_input!(discipline, "x", [1], "m")  # scalar
-    Philote.add_input!(discipline, "y", [2, 2], "m")  # 2x2 matrix
-
-    # Declare outputs
-    Philote.add_output!(discipline, "f", [1], "m**2")
-
-    # Declare partials (optional, for gradient-based optimization)
-    Philote.declare_partials!(discipline, "f", "x")
-    Philote.declare_partials!(discipline, "f", "y")
+    # Declare partial derivatives
+    Philote.declare_partials!(discipline, "y", "x")
 end
-```
 
-### 3. Implement `compute`
-
-Define the forward computation:
-
-```julia
-function Philote.compute(discipline::MyDiscipline,
-                        inputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.compute(discipline::MyDiscipline, inputs::Dict{String,Array})
     x = inputs["x"][1]
-    y_matrix = reshape(inputs["y"], 2, 2)
+    y = x^2
+    return Dict("y" => [y])
+end
 
-    # Your computation here
-    f = discipline.scale_factor * (x + sum(y_matrix))
-
-    return Dict("f" => [f])
+function Philote.compute_partials(discipline::MyDiscipline, inputs::Dict{String,Array})
+    x = inputs["x"][1]
+    dy_dx = 2*x
+    return Dict("y" => Dict("x" => reshape([dy_dx], 1, 1)))
 end
 ```
 
-### 4. Implement `set_options!` (Optional)
+### 2. Create a Configuration File
 
-Handle configuration options:
+Create `my_config.yaml`:
+
+```yaml
+discipline:
+  kind: explicit
+  julia_file: my_discipline.jl
+  julia_type: MyDiscipline
+
+server:
+  address: "[::]:50051"
+```
+
+### 3. Start the Server
+
+```bash
+philote-julia-serve my_config.yaml
+```
+
+That's it! Your Julia discipline is now accessible via gRPC on port 50051.
+
+### 4. Connect from a Client
+
+```python
+import grpc
+import philote_mdo.general as pmdo
+
+# Connect to server
+channel = grpc.insecure_channel("localhost:50051")
+client = pmdo.ExplicitClient(channel=channel)
+
+# Use the discipline
+client.run_setup()
+outputs = client.run_compute({"x": [3.0]})
+print(outputs)  # {'y': [9.0]}
+```
+
+## Creating Disciplines
+
+### Explicit Disciplines
+
+Explicit disciplines compute outputs as a direct function of inputs: `outputs = f(inputs)`.
 
 ```julia
-function Philote.set_options!(discipline::MyDiscipline,
-                              options::Dict{String, <:Any})
-    if haskey(options, "scale_factor")
-        discipline.scale_factor = Float64(options["scale_factor"])
+mutable struct ParaboloidDiscipline <: Philote.ExplicitDiscipline
+    function ParaboloidDiscipline()
+        new()
     end
 end
-```
 
-### 5. Implement `compute_partials` (Optional)
+function Philote.setup!(discipline::ParaboloidDiscipline)
+    # Inputs
+    Philote.add_input!(discipline, "x", [1], "m")
+    Philote.add_input!(discipline, "y", [1], "m")
 
-Provide analytical gradients:
+    # Outputs
+    Philote.add_output!(discipline, "f_xy", [1], "m^2")
 
-```julia
-function Philote.compute_partials(discipline::MyDiscipline,
-                                  inputs::Dict{String, <:AbstractArray{Float64}})
-    # Compute derivatives
-    df_dx = discipline.scale_factor
-    df_dy = fill(discipline.scale_factor, 4)  # Flattened 2x2 matrix
+    # Partials
+    Philote.declare_partials!(discipline, "f_xy", "x")
+    Philote.declare_partials!(discipline, "f_xy", "y")
+end
+
+function Philote.compute(discipline::ParaboloidDiscipline, inputs::Dict{String,Array})
+    x = inputs["x"][1]
+    y = inputs["y"][1]
+    f = (x - 3)^2 + x*y + (y + 4)^2
+    return Dict("f_xy" => [f])
+end
+
+function Philote.compute_partials(discipline::ParaboloidDiscipline, inputs::Dict{String,Array})
+    x = inputs["x"][1]
+    y = inputs["y"][1]
+
+    df_dx = 2*(x - 3) + y
+    df_dy = x + 2*(y + 4)
 
     return Dict(
-        "f" => Dict(
-            "x" => [df_dx],
-            "y" => df_dy
+        "f_xy" => Dict(
+            "x" => reshape([df_dx], 1, 1),
+            "y" => reshape([df_dy], 1, 1)
         )
     )
 end
 ```
 
+### Required Methods
+
+Every discipline must implement:
+
+1. `Philote.setup!(discipline)` - Declare inputs, outputs, and partials
+2. `Philote.compute(discipline, inputs)` - Compute outputs from inputs
+
+Optional methods:
+
+3. `Philote.compute_partials(discipline, inputs)` - Compute gradients (if `provides_gradients = true`)
+4. `Philote.set_options!(discipline, options)` - Set discipline options from config
+
+See `examples/paraboloid.jl` for a complete example.
+
+## Configuration Files
+
+Configuration files use YAML format. See `examples/configs/` for examples.
+
+### Complete Configuration
+
+```yaml
+discipline:
+  kind: explicit              # Required: "explicit" or "implicit"
+  julia_file: path/to/file.jl # Required: Path to Julia file
+  julia_type: DisciplineType  # Required: Julia struct name
+
+  # Optional: Discipline options
+  options:
+    param1: value1
+    param2: value2
+
+server:
+  address: "[::]:50051"       # Optional: Server address (default: [::]:50051)
+  max_workers: 10             # Optional: Thread pool size (default: 10)
+```
+
+For more details, see `examples/configs/README.md`.
+
+## Command-Line Usage
+
+### Basic Usage
+
+```bash
+# Serve a discipline from a config file
+philote-julia-serve config.yaml
+
+# Using Python module directly
+python -m philote_julia.cli config.yaml
+```
+
+### Without Config File (Programmatic)
+
+You can also use the library programmatically:
+
+```python
+from philote_julia import JuliaWrapperDiscipline, PhiloteConfig, DisciplineConfig, ServerConfig
+from philote_julia.servers import serve_explicit_discipline
+
+# Create configuration
+config = PhiloteConfig(
+    discipline=DisciplineConfig(
+        kind="explicit",
+        julia_file="examples/paraboloid.jl",
+        julia_type="ParaboloidDiscipline"
+    ),
+    server=ServerConfig(address="[::]:50051")
+)
+
+# Start server
+serve_explicit_discipline(config)
+```
+
 ## Examples
 
-### Paraboloid Discipline (Explicit)
+The `examples/` directory contains:
 
-See [`examples/paraboloid.jl`](examples/paraboloid.jl) for a complete explicit discipline example implementing the paraboloid function:
+- `paraboloid.jl` - Simple explicit discipline (paraboloid function)
+- `configs/paraboloid.yaml` - Configuration for serving paraboloid
+- `serve_julia_discipline.py` - Programmatic server startup (backward compatibility)
+- `julia_wrapper_discipline.py` - Direct wrapper usage (backward compatibility)
+
+## Directory Structure
 
 ```
-f(x, y) = (x - 3)² + xy + (y + 4)² - 3
+Philote-Julia/
+├── philote_julia/           # Python package
+│   ├── __init__.py
+│   ├── config.py            # YAML configuration loading
+│   ├── wrapper_discipline.py # Julia wrapper discipline
+│   ├── cli.py               # Command-line interface
+│   └── servers/
+│       ├── __init__.py
+│       └── explicit.py      # Explicit discipline server
+├── src/
+│   └── Philote.jl           # Pure Julia interface
+├── examples/
+│   ├── paraboloid.jl        # Example discipline
+│   └── configs/
+│       ├── paraboloid.yaml  # Example config
+│       └── README.md        # Config documentation
+├── bin/
+│   └── philote-julia-serve  # Executable entry point
+├── setup.py                 # Package installer
+└── README.md                # This file
 ```
 
-Run the example:
+## Troubleshooting
+
+### Import Errors
+
+- Ensure Philote-Python is in `~/tools/Philote/Philote-Python` or in your PYTHONPATH
+- Install juliacall: `pip install juliacall`
+- Reinstall package: `pip install -e .`
+
+### Julia Load Errors
+
+- Verify the Julia type name matches exactly (case-sensitive)
+- Check that your Julia file is syntactically correct
+- Ensure the Julia type extends `AbstractDiscipline` or `ExplicitDiscipline`
+
+### Server Won't Start
+
+- Check that the port isn't already in use
+- Try a different port in the config file
+- Check server logs for detailed error messages
+
+### Connection Errors
+
+- Ensure server address matches client address
+- Check firewall settings
+- Verify server is running before connecting client
+
+## How It Works
+
+The implementation uses a multi-layer architecture:
+
+1. **Julia Layer**: Pure Julia disciplines implementing the Philote.jl interface
+2. **Python Wrapper**: `JuliaWrapperDiscipline` loads Julia code via juliacall and presents a Python discipline interface
+3. **gRPC Server**: Philote-Python's `ExplicitServer` hosts the wrapped discipline
+4. **Protocol**: Standard Philote gRPC protocol for MDO
+
+Data flow:
+```
+Client → gRPC → Python Server → JuliaWrapperDiscipline → juliacall → Pure Julia Code
+```
+
+Benefits:
+- Julia code remains pure (no FFI code needed)
+- Proven server infrastructure from Philote-Python
+- Efficient zero-copy data transfer via juliacall
+- Full protocol compatibility
+
+## Development
+
+### Running Tests
 
 ```bash
-julia examples/paraboloid.jl
+# Start server
+philote-julia-serve examples/configs/paraboloid.yaml
+
+# In another terminal, run client
+python test_client.py
 ```
 
-### Quadratic Implicit Discipline
-
-See [`examples/quadratic_implicit.jl`](examples/quadratic_implicit.jl) for a complete implicit discipline example that solves quadratic equations:
-
-```
-R(x) = ax² + bx + c = 0
-```
-
-This example demonstrates:
-- Defining residual equations
-- Solving for outputs that satisfy residuals
-- Computing residual Jacobians
-
-Run the example:
-
-```bash
-julia examples/quadratic_implicit.jl
-```
-
-## Discipline Types
-
-### Explicit Disciplines
-
-For analyses of the form `outputs = f(inputs)`.
-
-**Required methods:**
-- `setup!(discipline)`
-- `compute(discipline, inputs)`
-
-**Optional methods:**
-- `set_options!(discipline, options)`
-- `compute_partials(discipline, inputs)`
-
-### Implicit Disciplines
-
-For analyses with residual equations that must be solved iteratively.
-
-**Required methods:**
-- `setup!(discipline)`
-- `compute_residuals(discipline, inputs)`
-- `solve_residuals(discipline, inputs)`
-
-**Optional methods:**
-- `set_options!(discipline, options)`
-- `compute_residual_partials(discipline, inputs)`
-
-## API Reference
-
-### Discipline Declaration
-
-- `add_input!(discipline, name, shape, units)` - Declare an input variable
-- `add_output!(discipline, name, shape, units)` - Declare an output variable
-- `add_residual!(discipline, name, shape, units)` - Declare a residual (implicit only)
-- `add_option!(discipline, name, type)` - Declare a configuration option
-- `declare_partials!(discipline, output, input)` - Declare gradient availability
-
-### Data Types
-
-**Shapes:** Vector of integers, e.g.:
-- `[1]` - scalar
-- `[3]` - 1D array of length 3
-- `[2, 3]` - 2×3 matrix
-
-**Units:** String representation of physical units, e.g.:
-- `"m"` - meters
-- `"kg"` - kilograms
-- `"m**2"` - square meters
-- `"m/s"` - meters per second
-
-**Option Types:**
-- `"float"` - Floating point number
-- `"int"` - Integer
-- `"bool"` - Boolean
-- `"string"` - String
-
-### Metadata Access
-
-```julia
-meta = Philote.get_metadata(discipline)
-meta.name = "MyDiscipline"
-meta.version = "1.0.0"
-```
-
-## C++ Wrapper Integration
-
-The `cpp/` directory contains a complete C++ wrapper that embeds Julia disciplines in gRPC servers.
-
-### Quick Start
-
-1. **Write your Julia discipline** (as shown above)
-
-2. **Build the C++ wrapper:**
-```bash
-cd cpp
-mkdir build && cd build
-cmake .. -DPHILOTE_CPP_DIR=../../Philote-Cpp -DBUILD_EXAMPLES=ON
-cmake --build .
-```
-
-3. **Create a YAML configuration file:**
-```yaml
-discipline:
-  kind: explicit  # or 'implicit'
-  julia_file: examples/paraboloid.jl
-  julia_type: ParaboloidDiscipline
-
-server:
-  address: localhost:50051
-```
-
-4. **Run the generic server launcher:**
-```bash
-./bin/philote_julia_server ../examples/configs/paraboloid.yaml
-```
-
-The server loads your Julia discipline and serves it via gRPC. No C++ code needed!
-
-### Deploy Your Own Discipline
-
-**Option 1: YAML Configuration (Recommended)**
-
-No C++ code needed - just create a config file:
-
-```yaml
-discipline:
-  kind: explicit
-  julia_file: path/to/my_discipline.jl
-  julia_type: MyDiscipline
-
-server:
-  address: localhost:50051
-```
-
-Then run:
-```bash
-./bin/philote_julia_server my_config.yaml
-```
-
-**Option 2: Custom C++ Launcher**
-
-If you need more control, you can write a C++ program:
-
-```cpp
-#include "julia_explicit.h"
-#include <grpc++/grpc++.h>
-
-int main() {
-    // Wrap your Julia discipline
-    philote::JuliaExplicitDiscipline discipline(
-        "my_discipline.jl",
-        "MyDiscipline"
-    );
-
-    // Build and start gRPC server
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort("localhost:50051",
-                            grpc::InsecureServerCredentials());
-    discipline.RegisterServices(builder);
-
-    auto server = builder.BuildAndStart();
-    server->Wait();
-}
-```
-
-### Setting Options from C++
-
-You can set discipline options from C++ before running computations:
-
-```cpp
-#include "julia_explicit.h"
-
-// Create and setup discipline
-philote::JuliaExplicitDiscipline discipline("my.jl", "MyDiscipline");
-discipline.Initialize();
-discipline.Setup();
-
-// Set options
-std::map<std::string, std::pair<std::string, std::string>> options;
-options["scale_factor"] = {"2.5", "float"};  // {value, type}
-options["max_iterations"] = {"100", "int"};
-options["verbose"] = {"true", "bool"};
-options["method"] = {"newton", "string"};
-
-discipline.SetOptions(options);
-
-// Now compute...
-```
-
-Supported option types:
-- `"float"` - Converted to Float64
-- `"int"` - Converted to Int64
-- `"bool"` - Converted to Bool
-- `"string"` - Converted to String
-
-### What the C++ Wrapper Provides
-
-The wrapper includes:
-- **JuliaRuntime**: Singleton managing Julia lifecycle
-- **JuliaMarshal**: Bidirectional C++/Julia data conversion
-- **JuliaExplicitDiscipline**: Wrapper class inheriting from `philote::ExplicitDiscipline`
-- **JuliaImplicitDiscipline**: Wrapper class for implicit disciplines
-- **Options marshalling**: Type-aware conversion of configuration options
-- **CMake integration**: FindJulia module and build system
-- **Example servers**: Complete working examples
-
-See [`cpp/README.md`](cpp/README.md) for detailed documentation.
-
-### Architecture
-
-```
-┌─────────────────────────────────────┐
-│   gRPC Client (Any Language)        │
-└────────────┬────────────────────────┘
-             │ Philote Protocol (gRPC)
-┌────────────┴────────────────────────┐
-│   C++ Server (Philote-Cpp)          │
-│   ┌─────────────────────────────┐   │
-│   │ JuliaExplicitDiscipline     │   │
-│   │ (C++ wrapper)               │   │
-│   └──────────┬──────────────────┘   │
-│              │                       │
-│   ┌──────────┴──────────────────┐   │
-│   │ Data Marshaling Layer       │   │
-│   │ (C++ ↔ Julia)               │   │
-│   └──────────┬──────────────────┘   │
-└──────────────┼──────────────────────┘
-               │ Julia C API
-┌──────────────┴──────────────────────┐
-│   Julia Runtime                     │
-│   ┌─────────────────────────────┐   │
-│   │ Your Discipline (Julia)     │   │
-│   │ - setup!()                  │   │
-│   │ - compute()                 │   │
-│   │ - compute_partials()        │   │
-│   └─────────────────────────────┘   │
-└─────────────────────────────────────┘
-```
-
-## Testing
-
-### Julia Tests
-
-Run the Julia test suite:
-
-```bash
-julia --project=. test/runtests.jl
-```
-
-The Julia tests cover:
-- Metadata management
-- Explicit discipline interface
-- Paraboloid example implementation
-- Gradient accuracy (finite difference checks)
-
-### C++ Tests
-
-Build and run the C++ test suite:
-
-```bash
-cd cpp
-mkdir build && cd build
-cmake .. -DPHILOTE_CPP_DIR=../../Philote-Cpp -DBUILD_TESTS=ON
-cmake --build .
-ctest --output-on-failure
-```
-
-Or run the test executable directly:
-
-```bash
-./philote_julia_tests
-```
-
-The C++ tests cover:
-- JuliaRuntime: Initialization, module loading, exception handling
-- JuliaMarshal: Bidirectional C++/Julia data conversion
-- JuliaExplicitDiscipline: Full discipline integration testing
-
-**Note:** C++ tests require:
-- Google Test installed
-- Philote-Cpp built and available
-- Julia runtime accessible
+### Contributing
+
+Contributions are welcome! Please ensure:
+- Julia code follows standard Julia style
+- Python code follows PEP 8
+- All examples work correctly
+- Documentation is updated
 
 ## License
 
-See [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+[Add license information here]
 
 ## Related Projects
 
-- [Philote-Cpp](../Philote-Cpp) - C++ implementation of the Philote MDO standard
-- [Philote Protocol](https://github.com/philote/philote) - Philote standard specification
+- **Philote-Python**: Python implementation of Philote MDO framework
+- **Philote-Cpp**: C++ implementation with protocol definitions
+- **juliacall**: Python-Julia integration library
+
+## Status
+
+**Current Status**: Alpha - Working implementation with YAML configuration support
+
+**Working**:
+- ✅ Pure Julia discipline interface
+- ✅ Python wrapper via juliacall
+- ✅ YAML-based configuration
+- ✅ Command-line server tool
+- ✅ Explicit disciplines
+- ✅ Gradient computation
+
+**Future Work**:
+- ⏳ Implicit discipline support
+- ⏳ Comprehensive test suite
+- ⏳ Performance benchmarks
+- ⏳ Additional examples
+- ⏳ Julia-native gRPC server (when ecosystem matures)
