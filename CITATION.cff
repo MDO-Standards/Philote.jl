@@ -8,8 +8,8 @@ authors:
     given-names: "Christopher A."
   - family-names: "Xu"
     given-names: "Alexander"
-repository-code: "https://github.com/MDO-Standards/Philote-Julia"
-url: "https://github.com/MDO-Standards/Philote-Julia"
+repository-code: "https://github.com/MDO-Standards/Philote.jl"
+url: "https://github.com/MDO-Standards/Philote.jl"
 license: Apache-2.0
 version: 0.1.0
 date-released: 2025-01-01
