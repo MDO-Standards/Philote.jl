@@ -250,17 +250,17 @@ if abspath(PROGRAM_FILE) == @__FILE__
     println("Coefficients: a=$(inputs["a"][1]), b=$(inputs["b"][1]), c=$(inputs["c"][1])")
 
     # Solve for x
-    outputs = Philote.solve_residuals(discipline, inputs)
+    outputs = Dict("x" => [0.0])  # Initial guess
+    Philote.solve_residuals(discipline, inputs, outputs)
     x_solution = outputs["x"][1]
     println("Solution: x = $x_solution")
 
     # Verify residual is zero
-    inputs_with_x = merge(inputs, Dict("x" => [x_solution]))
-    residuals = Philote.compute_residuals(discipline, inputs_with_x)
+    residuals = Philote.compute_residuals(discipline, inputs, outputs)
     println("Residual at solution: R = $(residuals["R"][1])")
 
     # Compute partials
-    partials = Philote.compute_residual_partials(discipline, inputs_with_x)
+    partials = Philote.residual_partials(discipline, inputs, outputs)
     println("Partials:")
     println("  dR/dx = $(partials["R"]["x"][1])")
     println("  dR/da = $(partials["R"]["a"][1])")
@@ -276,12 +276,12 @@ if abspath(PROGRAM_FILE) == @__FILE__
     inputs2 = Dict("a" => [1.0], "b" => [-2.0], "c" => [-3.0])
     println("Coefficients: a=$(inputs2["a"][1]), b=$(inputs2["b"][1]), c=$(inputs2["c"][1])")
 
-    outputs2 = Philote.solve_residuals(discipline, inputs2)
+    outputs2 = Dict("x" => [0.0])
+    Philote.solve_residuals(discipline, inputs2, outputs2)
     x_solution2 = outputs2["x"][1]
     println("Solution: x = $x_solution2")
 
-    inputs2_with_x = merge(inputs2, Dict("x" => [x_solution2]))
-    residuals2 = Philote.compute_residuals(discipline, inputs2_with_x)
+    residuals2 = Philote.compute_residuals(discipline, inputs2, outputs2)
     println("Residual at solution: R = $(residuals2["R"][1])")
 
     # Test Case 3: 2x² + 3x - 2 = 0
@@ -292,11 +292,11 @@ if abspath(PROGRAM_FILE) == @__FILE__
     inputs3 = Dict("a" => [2.0], "b" => [3.0], "c" => [-2.0])
     println("Coefficients: a=$(inputs3["a"][1]), b=$(inputs3["b"][1]), c=$(inputs3["c"][1])")
 
-    outputs3 = Philote.solve_residuals(discipline, inputs3)
+    outputs3 = Dict("x" => [0.0])
+    Philote.solve_residuals(discipline, inputs3, outputs3)
     x_solution3 = outputs3["x"][1]
     println("Solution: x = $x_solution3")
 
-    inputs3_with_x = merge(inputs3, Dict("x" => [x_solution3]))
-    residuals3 = Philote.compute_residuals(discipline, inputs3_with_x)
+    residuals3 = Philote.compute_residuals(discipline, inputs3, outputs3)
     println("Residual at solution: R = $(residuals3["R"][1]) (should be ≈ 0)")
 end
