@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Implicit Disciplines · Philote.jl</title><meta name="title" content="Implicit Disciplines · Philote.jl"/><meta property="og:title" content="Implicit Disciplines · Philote.jl"/><meta property="twitter:title" content="Implicit Disciplines · Philote.jl"/><meta name="description" content="Documentation for Philote.jl."/><meta property="og:description" content="Documentation for Philote.jl."/><meta property="twitter:description" content="Documentation for Philote.jl."/><meta property="og:url" content="https://MDO-Standards.github.io/Philote.jl/implicit_disciplines/"/><meta property="twitter:url" content="https://MDO-Standards.github.io/Philote.jl/implicit_disciplines/"/><link rel="canonical" href="https://MDO-Standards.github.io/Philote.jl/implicit_disciplines/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">Philote.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Getting Started</span><ul><li><a class="tocitem" href="../concepts/">MDO Concepts</a></li><li><a class="tocitem" href="../tutorial/">Tutorial</a></li></ul></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../explicit_disciplines/">Explicit Disciplines</a></li><li class="is-active"><a class="tocitem" href>Implicit Disciplines</a><ul class="internal"><li><a class="tocitem" href="#What-Are-Implicit-Disciplines?"><span>What Are Implicit Disciplines?</span></a></li><li><a class="tocitem" href="#When-to-Use-Implicit-Disciplines"><span>When to Use Implicit Disciplines</span></a></li><li><a class="tocitem" href="#Key-Differences-from-Explicit-Disciplines"><span>Key Differences from Explicit Disciplines</span></a></li><li><a class="tocitem" href="#Required-Methods"><span>Required Methods</span></a></li><li><a class="tocitem" href="#Optional-Methods"><span>Optional Methods</span></a></li><li><a class="tocitem" href="#Complete-Example:-Quadratic-Solver"><span>Complete Example: Quadratic Solver</span></a></li><li><a class="tocitem" href="#Understanding-Residuals-and-Jacobians"><span>Understanding Residuals and Jacobians</span></a></li><li><a class="tocitem" href="#Solving-Strategies"><span>Solving Strategies</span></a></li><li><a class="tocitem" href="#Advanced-Topics"><span>Advanced Topics</span></a></li><li><a class="tocitem" href="#Jacobian-Verification"><span>Jacobian Verification</span></a></li><li><a class="tocitem" href="#Best-Practices"><span>Best Practices</span></a></li><li><a class="tocitem" href="#Troubleshooting"><span>Troubleshooting</span></a></li><li><a class="tocitem" href="#Next-Steps"><span>Next Steps</span></a></li></ul></li><li><a class="tocitem" href="../integration/">Integration with Philote-Python</a></li></ul></li><li><a class="tocitem" href="../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">User Guide</a></li><li class="is-active"><a href>Implicit Disciplines</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Implicit Disciplines</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/MDO-Standards/Philote.jl/blob/main/docs/src/implicit_disciplines.md#" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="implicit_disciplines"><a class="docs-heading-anchor" href="#implicit_disciplines">Implicit Disciplines</a><a id="implicit_disciplines-1"></a><a class="docs-heading-anchor-permalink" href="#implicit_disciplines" title="Permalink"></a></h1><p>This guide provides comprehensive documentation on creating and using implicit disciplines in Philote.jl.</p><h2 id="What-Are-Implicit-Disciplines?"><a class="docs-heading-anchor" href="#What-Are-Implicit-Disciplines?">What Are Implicit Disciplines?</a><a id="What-Are-Implicit-Disciplines?-1"></a><a class="docs-heading-anchor-permalink" href="#What-Are-Implicit-Disciplines?" title="Permalink"></a></h2><p>Implicit disciplines solve a system of residual equations to find outputs:</p><pre><code class="nohighlight hljs">residuals(inputs, outputs) = 0</code></pre><p>The discipline must find values of <code>outputs</code> that make the residuals equal (or close) to zero for given <code>inputs</code>. This requires iterative solving.</p><h2 id="When-to-Use-Implicit-Disciplines"><a class="docs-heading-anchor" href="#When-to-Use-Implicit-Disciplines">When to Use Implicit Disciplines</a><a id="When-to-Use-Implicit-Disciplines-1"></a><a class="docs-heading-anchor-permalink" href="#When-to-Use-Implicit-Disciplines" title="Permalink"></a></h2><p>Use implicit disciplines for:</p><ul><li><strong>Equilibrium conditions</strong>: Problems where forces, moments, or flows must balance</li><li><strong>Fixed-point iterations</strong>: Finding x such that f(x) = x</li><li><strong>Nonlinear systems</strong>: Coupled equations that can&#39;t be solved directly</li><li><strong>Physics-based solvers</strong>: CFD, FEA, and other iterative simulation codes</li><li><strong>Trim analysis</strong>: Finding control settings that achieve desired states</li></ul><h2 id="Key-Differences-from-Explicit-Disciplines"><a class="docs-heading-anchor" href="#Key-Differences-from-Explicit-Disciplines">Key Differences from Explicit Disciplines</a><a id="Key-Differences-from-Explicit-Disciplines-1"></a><a class="docs-heading-anchor-permalink" href="#Key-Differences-from-Explicit-Disciplines" title="Permalink"></a></h2><table><tr><th style="text-align: right">Aspect</th><th style="text-align: right">Explicit</th><th style="text-align: right">Implicit</th></tr><tr><td style="text-align: right">Computation</td><td style="text-align: right"><code>outputs = f(inputs)</code></td><td style="text-align: right">Solve <code>R(inputs, outputs) = 0</code></td></tr><tr><td style="text-align: right">Speed</td><td style="text-align: right">Fast (direct)</td><td style="text-align: right">Slower (iterative)</td></tr><tr><td style="text-align: right">Complexity</td><td style="text-align: right">Simple</td><td style="text-align: right">More complex</td></tr><tr><td style="text-align: right">Residuals</td><td style="text-align: right">None</td><td style="text-align: right">Must define</td></tr><tr><td style="text-align: right">Jacobian</td><td style="text-align: right"><code>∂outputs/∂inputs</code></td><td style="text-align: right"><code>∂R/∂outputs</code> and <code>∂R/∂inputs</code></td></tr></table><h2 id="Required-Methods"><a class="docs-heading-anchor" href="#Required-Methods">Required Methods</a><a id="Required-Methods-1"></a><a class="docs-heading-anchor-permalink" href="#Required-Methods" title="Permalink"></a></h2><p>Every implicit discipline must implement these methods:</p><h3 id="1.-setup!(discipline)"><a class="docs-heading-anchor" href="#1.-setup!(discipline)">1. <code>setup!(discipline)</code></a><a id="1.-setup!(discipline)-1"></a><a class="docs-heading-anchor-permalink" href="#1.-setup!(discipline)" title="Permalink"></a></h3><p>Declares the discipline&#39;s interface, including residuals:</p><pre><code class="language-julia hljs">function Philote.setup!(discipline::MyImplicitDiscipline)
+    # Declare inputs
+    Philote.add_input!(discipline, &quot;input_name&quot;, shape, &quot;units&quot;)
+
+    # Declare outputs (state variables to be solved for)
+    Philote.add_output!(discipline, &quot;output_name&quot;, shape, &quot;units&quot;)
+
+    # Declare residuals (must equal zero)
+    Philote.add_residual!(discipline, &quot;residual_name&quot;, shape, &quot;units&quot;)
+
+    # Declare Jacobian partials
+    Philote.declare_partials!(discipline, &quot;residual_name&quot;, &quot;output_name&quot;)  # dR/d(state)
+    Philote.declare_partials!(discipline, &quot;residual_name&quot;, &quot;input_name&quot;)   # dR/d(input)
+end</code></pre><h3 id="2.-compute_residuals(discipline,-inputs,-outputs)"><a class="docs-heading-anchor" href="#2.-compute_residuals(discipline,-inputs,-outputs)">2. <code>compute_residuals(discipline, inputs, outputs)</code></a><a id="2.-compute_residuals(discipline,-inputs,-outputs)-1"></a><a class="docs-heading-anchor-permalink" href="#2.-compute_residuals(discipline,-inputs,-outputs)" title="Permalink"></a></h3><p>Computes the residual values for given inputs and current output guess:</p><pre><code class="language-julia hljs">function Philote.compute_residuals(discipline::MyImplicitDiscipline,
+                                    inputs::Dict{String, &lt;:AbstractArray{Float64}},
+                                    outputs::Dict{String, &lt;:AbstractArray{Float64}})
+    # Extract inputs and current output values
+    x = inputs[&quot;x&quot;]
+    y = outputs[&quot;y&quot;]  # Current guess for output
+
+    # Compute residual
+    R = ...  # Should be zero when y is correct
+
+    return Dict(&quot;R&quot; =&gt; R)
+end</code></pre><h3 id="3.-solve_residuals(discipline,-inputs,-outputs)"><a class="docs-heading-anchor" href="#3.-solve_residuals(discipline,-inputs,-outputs)">3. <code>solve_residuals(discipline, inputs, outputs)</code></a><a id="3.-solve_residuals(discipline,-inputs,-outputs)-1"></a><a class="docs-heading-anchor-permalink" href="#3.-solve_residuals(discipline,-inputs,-outputs)" title="Permalink"></a></h3><p>Solves for outputs that make residuals zero (modifies <code>outputs</code> in place):</p><pre><code class="language-julia hljs">function Philote.solve_residuals(discipline::MyImplicitDiscipline,
+                                  inputs::Dict{String, &lt;:AbstractArray{Float64}},
+                                  outputs::Dict{String, &lt;:AbstractArray{Float64}})
+    # Extract inputs
+    x = inputs[&quot;x&quot;]
+
+    # Solve for y such that R(x, y) = 0
+    y_solution = solve_somehow(x)
+
+    # Modify outputs dictionary in place
+    outputs[&quot;y&quot;] .= y_solution
+
+    return nothing  # Must return nothing
+end</code></pre><h2 id="Optional-Methods"><a class="docs-heading-anchor" href="#Optional-Methods">Optional Methods</a><a id="Optional-Methods-1"></a><a class="docs-heading-anchor-permalink" href="#Optional-Methods" title="Permalink"></a></h2><h3 id="4.-residual_partials(discipline,-inputs,-outputs)"><a class="docs-heading-anchor" href="#4.-residual_partials(discipline,-inputs,-outputs)">4. <code>residual_partials(discipline, inputs, outputs)</code></a><a id="4.-residual_partials(discipline,-inputs,-outputs)-1"></a><a class="docs-heading-anchor-permalink" href="#4.-residual_partials(discipline,-inputs,-outputs)" title="Permalink"></a></h3><p>Computes the Jacobian of residuals (highly recommended for optimization):</p><pre><code class="language-julia hljs">function Philote.residual_partials(discipline::MyImplicitDiscipline,
+                                    inputs::Dict{String, &lt;:AbstractArray{Float64}},
+                                    outputs::Dict{String, &lt;:AbstractArray{Float64}})
+    # Compute partial derivatives of residuals
+    dR_dy = ...  # ∂R/∂y (with respect to outputs/states)
+    dR_dx = ...  # ∂R/∂x (with respect to inputs)
+
+    # Return nested dictionary
+    return Dict(&quot;R&quot; =&gt; Dict(&quot;y&quot; =&gt; dR_dy, &quot;x&quot; =&gt; dR_dx))
+end</code></pre><h2 id="Complete-Example:-Quadratic-Solver"><a class="docs-heading-anchor" href="#Complete-Example:-Quadratic-Solver">Complete Example: Quadratic Solver</a><a id="Complete-Example:-Quadratic-Solver-1"></a><a class="docs-heading-anchor-permalink" href="#Complete-Example:-Quadratic-Solver" title="Permalink"></a></h2><p>Here&#39;s a complete implicit discipline that solves ax² + bx + c = 0:</p><pre><code class="language-julia hljs">using Philote
+
+# Define the discipline type
+mutable struct QuadraticImplicitDiscipline &lt;: Philote.ImplicitDiscipline
+    tolerance::Float64
+    max_iterations::Int
+
+    function QuadraticImplicitDiscipline()
+        new(1e-10, 100)
+    end
+end
+
+# Declare the interface
+function Philote.setup!(discipline::QuadraticImplicitDiscipline)
+    # Options
+    Philote.add_option!(discipline, &quot;tolerance&quot;, &quot;float&quot;)
+    Philote.add_option!(discipline, &quot;max_iterations&quot;, &quot;int&quot;)
+
+    # Inputs (coefficients)
+    Philote.add_input!(discipline, &quot;a&quot;, [1], &quot;1&quot;)
+    Philote.add_input!(discipline, &quot;b&quot;, [1], &quot;1&quot;)
+    Philote.add_input!(discipline, &quot;c&quot;, [1], &quot;1&quot;)
+
+    # Outputs (solution)
+    Philote.add_output!(discipline, &quot;x&quot;, [1], &quot;1&quot;)
+
+    # Residuals
+    Philote.add_residual!(discipline, &quot;R&quot;, [1], &quot;1&quot;)
+
+    # Jacobian: partials of residual w.r.t. outputs and inputs
+    Philote.declare_partials!(discipline, &quot;R&quot;, &quot;x&quot;)  # dR/dx
+    Philote.declare_partials!(discipline, &quot;R&quot;, &quot;a&quot;)  # dR/da
+    Philote.declare_partials!(discipline, &quot;R&quot;, &quot;b&quot;)  # dR/db
+    Philote.declare_partials!(discipline, &quot;R&quot;, &quot;c&quot;)  # dR/dc
+
+    # Metadata
+    meta = Philote.get_metadata(discipline)
+    meta.name = &quot;QuadraticImplicitDiscipline&quot;
+    meta.version = &quot;0.1.0&quot;
+end
+
+# Compute residual: R(x) = ax² + bx + c
+function Philote.compute_residuals(discipline::QuadraticImplicitDiscipline,
+                                    inputs::Dict{String, &lt;:AbstractArray{Float64}},
+                                    outputs::Dict{String, &lt;:AbstractArray{Float64}})
+    a = inputs[&quot;a&quot;][1]
+    b = inputs[&quot;b&quot;][1]
+    c = inputs[&quot;c&quot;][1]
+    x = outputs[&quot;x&quot;][1]
+
+    R = a * x^2 + b * x + c
+
+    return Dict(&quot;R&quot; =&gt; [R])
+end
+
+# Solve for x using quadratic formula
+function Philote.solve_residuals(discipline::QuadraticImplicitDiscipline,
+                                  inputs::Dict{String, &lt;:AbstractArray{Float64}},
+                                  outputs::Dict{String, &lt;:AbstractArray{Float64}})
+    a = inputs[&quot;a&quot;][1]
+    b = inputs[&quot;b&quot;][1]
+    c = inputs[&quot;c&quot;][1]
+
+    # Handle degenerate cases
+    if abs(a) &lt; 1e-14
+        # Linear: bx + c = 0
+        if abs(b) &lt; 1e-14
+            error(&quot;Degenerate equation&quot;)
+        end
+        x = -c / b
+    else
+        # Quadratic formula
+        discriminant = b^2 - 4*a*c
+        if discriminant &lt; 0
+            error(&quot;No real solutions&quot;)
+        end
+
+        sqrt_disc = sqrt(discriminant)
+        x1 = (-b + sqrt_disc) / (2*a)
+        x2 = (-b - sqrt_disc) / (2*a)
+
+        # Choose one root (arbitrary for this example)
+        x = abs(x1) &gt; abs(x2) ? x1 : x2
+    end
+
+    # Modify outputs in place
+    outputs[&quot;x&quot;][1] = x
+    return nothing
+end
+
+# Compute Jacobian
+function Philote.residual_partials(discipline::QuadraticImplicitDiscipline,
+                                    inputs::Dict{String, &lt;:AbstractArray{Float64}},
+                                    outputs::Dict{String, &lt;:AbstractArray{Float64}})
+    a = inputs[&quot;a&quot;][1]
+    b = inputs[&quot;b&quot;][1]
+    x = outputs[&quot;x&quot;][1]
+
+    # Derivatives of R = ax² + bx + c
+    dR_dx = 2.0 * a * x + b  # ∂R/∂x
+    dR_da = x^2              # ∂R/∂a
+    dR_db = x                # ∂R/∂b
+    dR_dc = 1.0              # ∂R/∂c
+
+    return Dict(&quot;R&quot; =&gt; Dict(
+        &quot;x&quot; =&gt; [dR_dx],
+        &quot;a&quot; =&gt; [dR_da],
+        &quot;b&quot; =&gt; [dR_db],
+        &quot;c&quot; =&gt; [dR_dc]
+    ))
+end
+
+# Configure options
+function Philote.set_options!(discipline::QuadraticImplicitDiscipline,
+                               options::Dict{String, &lt;:Any})
+    haskey(options, &quot;tolerance&quot;) &amp;&amp; (discipline.tolerance = Float64(options[&quot;tolerance&quot;]))
+    haskey(options, &quot;max_iterations&quot;) &amp;&amp; (discipline.max_iterations = Int(options[&quot;max_iterations&quot;]))
+end</code></pre><h2 id="Understanding-Residuals-and-Jacobians"><a class="docs-heading-anchor" href="#Understanding-Residuals-and-Jacobians">Understanding Residuals and Jacobians</a><a id="Understanding-Residuals-and-Jacobians-1"></a><a class="docs-heading-anchor-permalink" href="#Understanding-Residuals-and-Jacobians" title="Permalink"></a></h2><h3 id="What-is-a-Residual?"><a class="docs-heading-anchor" href="#What-is-a-Residual?">What is a Residual?</a><a id="What-is-a-Residual?-1"></a><a class="docs-heading-anchor-permalink" href="#What-is-a-Residual?" title="Permalink"></a></h3><p>A residual is an equation that must equal zero at the solution. For example:</p><ul><li><strong>Force balance</strong>: <code>R = F_applied - F_resistance</code> (should be zero at equilibrium)</li><li><strong>Flow conservation</strong>: <code>R = flow_in - flow_out</code> (should be zero at steady state)</li><li><strong>Fixed point</strong>: <code>R = f(x) - x</code> (should be zero when x is a fixed point)</li></ul><h3 id="The-Jacobian-Structure"><a class="docs-heading-anchor" href="#The-Jacobian-Structure">The Jacobian Structure</a><a id="The-Jacobian-Structure-1"></a><a class="docs-heading-anchor-permalink" href="#The-Jacobian-Structure" title="Permalink"></a></h3><p>For implicit disciplines, the Jacobian has two parts:</p><ol><li><p><strong>∂R/∂(outputs)</strong>: How residuals change with state variables</p><ul><li>Used by solvers to iterate toward solution</li><li>Critical for Newton-type methods</li></ul></li><li><p><strong>∂R/∂(inputs)</strong>: How residuals change with inputs</p><ul><li>Used for sensitivity analysis</li><li>Needed for gradient-based optimization</li></ul></li></ol><h2 id="Solving-Strategies"><a class="docs-heading-anchor" href="#Solving-Strategies">Solving Strategies</a><a id="Solving-Strategies-1"></a><a class="docs-heading-anchor-permalink" href="#Solving-Strategies" title="Permalink"></a></h2><h3 id="Direct-Analytical-Solution"><a class="docs-heading-anchor" href="#Direct-Analytical-Solution">Direct Analytical Solution</a><a id="Direct-Analytical-Solution-1"></a><a class="docs-heading-anchor-permalink" href="#Direct-Analytical-Solution" title="Permalink"></a></h3><p>When possible, solve directly (like the quadratic example):</p><pre><code class="language-julia hljs">function Philote.solve_residuals(discipline, inputs, outputs)
+    # Derive analytical solution
+    x_solution = analytical_formula(inputs)
+    outputs[&quot;x&quot;] .= x_solution
+    return nothing
+end</code></pre><h3 id="Newton&#39;s-Method"><a class="docs-heading-anchor" href="#Newton&#39;s-Method">Newton&#39;s Method</a><a id="Newton&#39;s-Method-1"></a><a class="docs-heading-anchor-permalink" href="#Newton&#39;s-Method" title="Permalink"></a></h3><p>For nonlinear systems without closed-form solutions:</p><pre><code class="language-julia hljs">using LinearAlgebra
+
+function Philote.solve_residuals(discipline, inputs, outputs)
+    tol = discipline.tolerance
+    max_iter = discipline.max_iterations
+
+    for iter in 1:max_iter
+        # Compute residual at current guess
+        R = Philote.compute_residuals(discipline, inputs, outputs)
+
+        # Check convergence
+        if maximum(abs.(R[&quot;R&quot;])) &lt; tol
+            return nothing
+        end
+
+        # Compute Jacobian (dR/doutputs)
+        J = Philote.residual_partials(discipline, inputs, outputs)
+
+        # Newton step: Δx = -J^{-1} * R
+        delta_x = -J[&quot;R&quot;][&quot;x&quot;] \ R[&quot;R&quot;]
+
+        # Update guess
+        outputs[&quot;x&quot;] .+= delta_x
+    end
+
+    error(&quot;Failed to converge in $max_iter iterations&quot;)
+end</code></pre><h3 id="Using-Existing-Solvers"><a class="docs-heading-anchor" href="#Using-Existing-Solvers">Using Existing Solvers</a><a id="Using-Existing-Solvers-1"></a><a class="docs-heading-anchor-permalink" href="#Using-Existing-Solvers" title="Permalink"></a></h3><p>Wrap external solvers or Julia packages:</p><pre><code class="language-julia hljs">using NLsolve
+
+function Philote.solve_residuals(discipline, inputs, outputs)
+    # Define residual function for NLsolve
+    function residual_func!(R_out, x_guess)
+        temp_outputs = Dict(&quot;x&quot; =&gt; x_guess)
+        R_dict = Philote.compute_residuals(discipline, inputs, temp_outputs)
+        R_out .= R_dict[&quot;R&quot;]
+    end
+
+    # Initial guess
+    x0 = outputs[&quot;x&quot;]
+
+    # Solve
+    result = nlsolve(residual_func!, x0, ftol=discipline.tolerance)
+
+    # Update outputs
+    outputs[&quot;x&quot;] .= result.zero
+    return nothing
+end</code></pre><h2 id="Advanced-Topics"><a class="docs-heading-anchor" href="#Advanced-Topics">Advanced Topics</a><a id="Advanced-Topics-1"></a><a class="docs-heading-anchor-permalink" href="#Advanced-Topics" title="Permalink"></a></h2><h3 id="Multiple-Residuals-and-States"><a class="docs-heading-anchor" href="#Multiple-Residuals-and-States">Multiple Residuals and States</a><a id="Multiple-Residuals-and-States-1"></a><a class="docs-heading-anchor-permalink" href="#Multiple-Residuals-and-States" title="Permalink"></a></h3><p>For systems with multiple equations:</p><pre><code class="language-julia hljs">function Philote.setup!(discipline::MultiStateDiscipline)
+    # 3 inputs
+    Philote.add_input!(discipline, &quot;force&quot;, [1], &quot;N&quot;)
+
+    # 3 states to solve for
+    Philote.add_output!(discipline, &quot;x&quot;, [1], &quot;m&quot;)
+    Philote.add_output!(discipline, &quot;y&quot;, [1], &quot;m&quot;)
+    Philote.add_output!(discipline, &quot;z&quot;, [1], &quot;m&quot;)
+
+    # 3 residuals (one per state)
+    Philote.add_residual!(discipline, &quot;R_x&quot;, [1], &quot;N&quot;)
+    Philote.add_residual!(discipline, &quot;R_y&quot;, [1], &quot;N&quot;)
+    Philote.add_residual!(discipline, &quot;R_z&quot;, [1], &quot;N&quot;)
+
+    # Jacobian structure
+    for R in [&quot;R_x&quot;, &quot;R_y&quot;, &quot;R_z&quot;]
+        for state in [&quot;x&quot;, &quot;y&quot;, &quot;z&quot;]
+            Philote.declare_partials!(discipline, R, state)
+        end
+        Philote.declare_partials!(discipline, R, &quot;force&quot;)
+    end
+end</code></pre><h3 id="Sparse-Jacobians"><a class="docs-heading-anchor" href="#Sparse-Jacobians">Sparse Jacobians</a><a id="Sparse-Jacobians-1"></a><a class="docs-heading-anchor-permalink" href="#Sparse-Jacobians" title="Permalink"></a></h3><p>If not all residuals depend on all states, declare only non-zero partials:</p><pre><code class="language-julia hljs"># R1 depends only on x1, R2 depends only on x2
+Philote.declare_partials!(discipline, &quot;R1&quot;, &quot;x1&quot;)  # Yes
+# Skip: declare_partials!(discipline, &quot;R1&quot;, &quot;x2&quot;)  # Zero, don&#39;t declare
+
+Philote.declare_partials!(discipline, &quot;R2&quot;, &quot;x2&quot;)  # Yes
+# Skip: declare_partials!(discipline, &quot;R2&quot;, &quot;x1&quot;)  # Zero, don&#39;t declare</code></pre><h3 id="Convergence-Monitoring"><a class="docs-heading-anchor" href="#Convergence-Monitoring">Convergence Monitoring</a><a id="Convergence-Monitoring-1"></a><a class="docs-heading-anchor-permalink" href="#Convergence-Monitoring" title="Permalink"></a></h3><p>Add convergence diagnostics:</p><pre><code class="language-julia hljs">function Philote.solve_residuals(discipline, inputs, outputs)
+    for iter in 1:discipline.max_iterations
+        R = Philote.compute_residuals(discipline, inputs, outputs)
+        norm_R = maximum(abs.(R[&quot;R&quot;]))
+
+        @debug &quot;Iteration $iter: ||R|| = $norm_R&quot;
+
+        if norm_R &lt; discipline.tolerance
+            @info &quot;Converged in $iter iterations&quot;
+            return nothing
+        end
+
+        # ... Newton step ...
+    end
+
+    @warn &quot;Failed to converge after $(discipline.max_iterations) iterations&quot;
+    error(&quot;Convergence failure&quot;)
+end</code></pre><h2 id="Jacobian-Verification"><a class="docs-heading-anchor" href="#Jacobian-Verification">Jacobian Verification</a><a id="Jacobian-Verification-1"></a><a class="docs-heading-anchor-permalink" href="#Jacobian-Verification" title="Permalink"></a></h2><p>Always verify your Jacobians using finite differences:</p><pre><code class="language-julia hljs">function check_jacobian(discipline, inputs, outputs; epsilon=1e-6)
+    # Compute analytic Jacobian
+    J_analytic = Philote.residual_partials(discipline, inputs, outputs)
+
+    # Check dR/d(outputs)
+    for (res_name, partials) in J_analytic
+        for (out_name, analytic_jac) in partials
+            if out_name in keys(outputs)  # It&#39;s an output/state
+                # Perturb output
+                outputs_pert = copy(outputs)
+                outputs_pert[out_name] = outputs[out_name] .+ epsilon
+
+                # Finite difference
+                R0 = Philote.compute_residuals(discipline, inputs, outputs)[res_name]
+                R1 = Philote.compute_residuals(discipline, inputs, outputs_pert)[res_name]
+                fd_jac = (R1 .- R0) ./ epsilon
+
+                # Compare
+                error = maximum(abs.(analytic_jac .- fd_jac))
+                if error &gt; 1e-5
+                    @warn &quot;Jacobian error: ∂$res_name/∂$out_name&quot; error
+                else
+                    @info &quot;✓ ∂$res_name/∂$out_name verified&quot; error
+                end
+            end
+        end
+    end
+end</code></pre><h2 id="Best-Practices"><a class="docs-heading-anchor" href="#Best-Practices">Best Practices</a><a id="Best-Practices-1"></a><a class="docs-heading-anchor-permalink" href="#Best-Practices" title="Permalink"></a></h2><ol><li><strong>Start with simple tests</strong>: Verify your discipline works on simple, known cases</li><li><strong>Check convergence</strong>: Monitor iterations and residual norms</li><li><strong>Provide good initial guesses</strong>: Store reasonable defaults in <code>outputs</code></li><li><strong>Implement gradients</strong>: Critical for optimization frameworks</li><li><strong>Verify Jacobians</strong>: Use finite differences to check your derivatives</li><li><strong>Handle edge cases</strong>: Check for singularities, non-convergence, etc.</li><li><strong>Document residual equations</strong>: Write the math clearly in docstrings</li></ol><h2 id="Troubleshooting"><a class="docs-heading-anchor" href="#Troubleshooting">Troubleshooting</a><a id="Troubleshooting-1"></a><a class="docs-heading-anchor-permalink" href="#Troubleshooting" title="Permalink"></a></h2><h3 id="Convergence-Failures"><a class="docs-heading-anchor" href="#Convergence-Failures">Convergence Failures</a><a id="Convergence-Failures-1"></a><a class="docs-heading-anchor-permalink" href="#Convergence-Failures" title="Permalink"></a></h3><p>If <code>solve_residuals</code> doesn&#39;t converge:</p><ol><li>Check initial guess quality</li><li>Try different solver parameters (tolerance, max_iterations)</li><li>Consider damping/relaxation in Newton steps</li><li>Verify residual equations are correct</li><li>Check for singularities in the Jacobian</li></ol><h3 id="Incorrect-Optimization-Results"><a class="docs-heading-anchor" href="#Incorrect-Optimization-Results">Incorrect Optimization Results</a><a id="Incorrect-Optimization-Results-1"></a><a class="docs-heading-anchor-permalink" href="#Incorrect-Optimization-Results" title="Permalink"></a></h3><p>If optimization gives wrong answers:</p><ol><li>Verify Jacobians with finite differences</li><li>Check that all partials are declared</li><li>Ensure <code>solve_residuals</code> actually finds the solution (residuals ≈ 0)</li><li>Test with analytical solutions if available</li></ol><h3 id="Performance-Issues"><a class="docs-heading-anchor" href="#Performance-Issues">Performance Issues</a><a id="Performance-Issues-1"></a><a class="docs-heading-anchor-permalink" href="#Performance-Issues" title="Permalink"></a></h3><p>If solving is too slow:</p><ol><li>Use better initial guesses (warm-starting)</li><li>Implement sparse Jacobian structures</li><li>Use more efficient linear solvers</li><li>Consider approximations or reduced-order models</li><li>Profile your code to find bottlenecks</li></ol><h2 id="Next-Steps"><a class="docs-heading-anchor" href="#Next-Steps">Next Steps</a><a id="Next-Steps-1"></a><a class="docs-heading-anchor-permalink" href="#Next-Steps" title="Permalink"></a></h2><ul><li>Review <a href="../explicit_disciplines/#explicit_disciplines">Explicit Disciplines</a> for comparison</li><li>Learn about <a href="../integration/#integration">Integration</a> to serve disciplines via gRPC</li><li>Consult the <a href="../api/#API-Reference">API Reference</a> for complete function documentation</li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../explicit_disciplines/">« Explicit Disciplines</a><a class="docs-footer-nextpage" href="../integration/">Integration with Philote-Python »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.15.0 on <span class="colophon-date" title="Monday 3 November 2025 04:57">Monday 3 November 2025</span>. Using Julia version 1.12.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

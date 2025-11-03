@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Explicit Disciplines · Philote.jl</title><meta name="title" content="Explicit Disciplines · Philote.jl"/><meta property="og:title" content="Explicit Disciplines · Philote.jl"/><meta property="twitter:title" content="Explicit Disciplines · Philote.jl"/><meta name="description" content="Documentation for Philote.jl."/><meta property="og:description" content="Documentation for Philote.jl."/><meta property="twitter:description" content="Documentation for Philote.jl."/><meta property="og:url" content="https://MDO-Standards.github.io/Philote.jl/explicit_disciplines/"/><meta property="twitter:url" content="https://MDO-Standards.github.io/Philote.jl/explicit_disciplines/"/><link rel="canonical" href="https://MDO-Standards.github.io/Philote.jl/explicit_disciplines/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">Philote.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Getting Started</span><ul><li><a class="tocitem" href="../concepts/">MDO Concepts</a></li><li><a class="tocitem" href="../tutorial/">Tutorial</a></li></ul></li><li><span class="tocitem">User Guide</span><ul><li class="is-active"><a class="tocitem" href>Explicit Disciplines</a><ul class="internal"><li><a class="tocitem" href="#What-Are-Explicit-Disciplines?"><span>What Are Explicit Disciplines?</span></a></li><li><a class="tocitem" href="#When-to-Use-Explicit-Disciplines"><span>When to Use Explicit Disciplines</span></a></li><li><a class="tocitem" href="#Required-Methods"><span>Required Methods</span></a></li><li><a class="tocitem" href="#Optional-Methods"><span>Optional Methods</span></a></li><li><a class="tocitem" href="#Complete-Example:-Paraboloid-Discipline"><span>Complete Example: Paraboloid Discipline</span></a></li><li><a class="tocitem" href="#Advanced-Topics"><span>Advanced Topics</span></a></li><li><a class="tocitem" href="#Common-Patterns"><span>Common Patterns</span></a></li><li><a class="tocitem" href="#Best-Practices"><span>Best Practices</span></a></li><li><a class="tocitem" href="#Troubleshooting"><span>Troubleshooting</span></a></li><li><a class="tocitem" href="#Next-Steps"><span>Next Steps</span></a></li></ul></li><li><a class="tocitem" href="../implicit_disciplines/">Implicit Disciplines</a></li><li><a class="tocitem" href="../integration/">Integration with Philote-Python</a></li></ul></li><li><a class="tocitem" href="../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">User Guide</a></li><li class="is-active"><a href>Explicit Disciplines</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Explicit Disciplines</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/MDO-Standards/Philote.jl/blob/main/docs/src/explicit_disciplines.md#" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="explicit_disciplines"><a class="docs-heading-anchor" href="#explicit_disciplines">Explicit Disciplines</a><a id="explicit_disciplines-1"></a><a class="docs-heading-anchor-permalink" href="#explicit_disciplines" title="Permalink"></a></h1><p>This guide provides comprehensive documentation on creating and using explicit disciplines in Philote.jl.</p><h2 id="What-Are-Explicit-Disciplines?"><a class="docs-heading-anchor" href="#What-Are-Explicit-Disciplines?">What Are Explicit Disciplines?</a><a id="What-Are-Explicit-Disciplines?-1"></a><a class="docs-heading-anchor-permalink" href="#What-Are-Explicit-Disciplines?" title="Permalink"></a></h2><p>Explicit disciplines compute outputs directly from inputs using a function:</p><pre><code class="nohighlight hljs">outputs = f(inputs)</code></pre><p>There&#39;s no iteration, no solving - just a direct computation. This makes them fast and straightforward to implement.</p><h2 id="When-to-Use-Explicit-Disciplines"><a class="docs-heading-anchor" href="#When-to-Use-Explicit-Disciplines">When to Use Explicit Disciplines</a><a id="When-to-Use-Explicit-Disciplines-1"></a><a class="docs-heading-anchor-permalink" href="#When-to-Use-Explicit-Disciplines" title="Permalink"></a></h2><p>Use explicit disciplines for:</p><ul><li><strong>Direct formulas</strong>: Mathematical expressions that can be evaluated directly</li><li><strong>Lookup tables</strong>: Interpolation from pre-computed data</li><li><strong>Surrogate models</strong>: Trained machine learning models or response surfaces</li><li><strong>Algebraic equations</strong>: Any equation where outputs can be calculated in one step</li><li><strong>Data transformations</strong>: Converting between coordinate systems, units, etc.</li></ul><h2 id="Required-Methods"><a class="docs-heading-anchor" href="#Required-Methods">Required Methods</a><a id="Required-Methods-1"></a><a class="docs-heading-anchor-permalink" href="#Required-Methods" title="Permalink"></a></h2><p>Every explicit discipline must implement these methods:</p><h3 id="1.-setup!(discipline)"><a class="docs-heading-anchor" href="#1.-setup!(discipline)">1. <code>setup!(discipline)</code></a><a id="1.-setup!(discipline)-1"></a><a class="docs-heading-anchor-permalink" href="#1.-setup!(discipline)" title="Permalink"></a></h3><p>Declares the discipline&#39;s interface:</p><pre><code class="language-julia hljs">function Philote.setup!(discipline::MyDiscipline)
+    # Declare inputs
+    Philote.add_input!(discipline, &quot;input_name&quot;, shape, &quot;units&quot;)
+
+    # Declare outputs
+    Philote.add_output!(discipline, &quot;output_name&quot;, shape, &quot;units&quot;)
+
+    # (Optional) Declare options
+    Philote.add_option!(discipline, &quot;option_name&quot;, &quot;type&quot;)
+
+    # (Optional) Declare which partials are available
+    Philote.declare_partials!(discipline, &quot;output_name&quot;, &quot;input_name&quot;)
+end</code></pre><h3 id="2.-compute(discipline,-inputs)"><a class="docs-heading-anchor" href="#2.-compute(discipline,-inputs)">2. <code>compute(discipline, inputs)</code></a><a id="2.-compute(discipline,-inputs)-1"></a><a class="docs-heading-anchor-permalink" href="#2.-compute(discipline,-inputs)" title="Permalink"></a></h3><p>Performs the computation:</p><pre><code class="language-julia hljs">function Philote.compute(discipline::MyDiscipline,
+                         inputs::Dict{String, &lt;:AbstractArray{Float64}})
+    # Extract inputs
+    x = inputs[&quot;x&quot;]
+
+    # Perform computation
+    y = f(x)
+
+    # Return outputs
+    return Dict(&quot;y&quot; =&gt; y)
+end</code></pre><h2 id="Optional-Methods"><a class="docs-heading-anchor" href="#Optional-Methods">Optional Methods</a><a id="Optional-Methods-1"></a><a class="docs-heading-anchor-permalink" href="#Optional-Methods" title="Permalink"></a></h2><h3 id="3.-compute_partials(discipline,-inputs)"><a class="docs-heading-anchor" href="#3.-compute_partials(discipline,-inputs)">3. <code>compute_partials(discipline, inputs)</code></a><a id="3.-compute_partials(discipline,-inputs)-1"></a><a class="docs-heading-anchor-permalink" href="#3.-compute_partials(discipline,-inputs)" title="Permalink"></a></h3><p>Computes analytic gradients (highly recommended for optimization):</p><pre><code class="language-julia hljs">function Philote.compute_partials(discipline::MyDiscipline,
+                                   inputs::Dict{String, &lt;:AbstractArray{Float64}})
+    # Compute partial derivatives
+    dy_dx = ...  # ∂y/∂x
+
+    # Return nested dictionary
+    return Dict(&quot;y&quot; =&gt; Dict(&quot;x&quot; =&gt; dy_dx))
+end</code></pre><h3 id="4.-set_options!(discipline,-options)"><a class="docs-heading-anchor" href="#4.-set_options!(discipline,-options)">4. <code>set_options!(discipline, options)</code></a><a id="4.-set_options!(discipline,-options)-1"></a><a class="docs-heading-anchor-permalink" href="#4.-set_options!(discipline,-options)" title="Permalink"></a></h3><p>Processes configuration options:</p><pre><code class="language-julia hljs">function Philote.set_options!(discipline::MyDiscipline,
+                               options::Dict{String, Any})
+    if haskey(options, &quot;my_option&quot;)
+        discipline.my_option = options[&quot;my_option&quot;]
+    end
+end</code></pre><h2 id="Complete-Example:-Paraboloid-Discipline"><a class="docs-heading-anchor" href="#Complete-Example:-Paraboloid-Discipline">Complete Example: Paraboloid Discipline</a><a id="Complete-Example:-Paraboloid-Discipline-1"></a><a class="docs-heading-anchor-permalink" href="#Complete-Example:-Paraboloid-Discipline" title="Permalink"></a></h2><p>Here&#39;s the complete paraboloid example from the package:</p><pre><code class="language-julia hljs">using Philote
+
+# Define the discipline type
+mutable struct ParaboloidDiscipline &lt;: Philote.ExplicitDiscipline
+    scale_factor::Float64
+    offset::Float64
+
+    function ParaboloidDiscipline()
+        new(1.0, 0.0)
+    end
+end
+
+# Declare the interface
+function Philote.setup!(discipline::ParaboloidDiscipline)
+    # Options
+    Philote.add_option!(discipline, &quot;scale_factor&quot;, &quot;float&quot;)
+    Philote.add_option!(discipline, &quot;offset&quot;, &quot;float&quot;)
+
+    # Inputs
+    Philote.add_input!(discipline, &quot;x&quot;, [1], &quot;m&quot;)
+    Philote.add_input!(discipline, &quot;y&quot;, [1], &quot;m&quot;)
+
+    # Outputs
+    Philote.add_output!(discipline, &quot;f_xy&quot;, [1], &quot;m**2&quot;)
+
+    # Declare gradients
+    Philote.declare_partials!(discipline, &quot;f_xy&quot;, &quot;x&quot;)
+    Philote.declare_partials!(discipline, &quot;f_xy&quot;, &quot;y&quot;)
+
+    # Set metadata
+    meta = Philote.get_metadata(discipline)
+    meta.name = &quot;ParaboloidDiscipline&quot;
+    meta.version = &quot;0.1.0&quot;
+end
+
+# Compute function: f(x, y) = (x - 3)^2 + xy + (y + 4)^2 - 3
+function Philote.compute(discipline::ParaboloidDiscipline,
+                         inputs::Dict{String, &lt;:AbstractArray{Float64}})
+    x = inputs[&quot;x&quot;][1]
+    y = inputs[&quot;y&quot;][1]
+
+    f_xy = (x - 3.0)^2 + x * y + (y + 4.0)^2 - 3.0
+    f_xy = discipline.scale_factor * f_xy + discipline.offset
+
+    return Dict(&quot;f_xy&quot; =&gt; [f_xy])
+end
+
+# Compute gradients
+function Philote.compute_partials(discipline::ParaboloidDiscipline,
+                                   inputs::Dict{String, &lt;:AbstractArray{Float64}})
+    x = inputs[&quot;x&quot;][1]
+    y = inputs[&quot;y&quot;][1]
+
+    # ∂f/∂x = 2(x - 3) + y
+    df_dx = discipline.scale_factor * (2.0 * (x - 3.0) + y)
+
+    # ∂f/∂y = x + 2(y + 4)
+    df_dy = discipline.scale_factor * (2.0 * (y + 4.0) + x)
+
+    return Dict(&quot;f_xy&quot; =&gt; Dict(&quot;x&quot; =&gt; [df_dx], &quot;y&quot; =&gt; [df_dy]))
+end
+
+# Configure options
+function Philote.set_options!(discipline::ParaboloidDiscipline,
+                               options::Dict{String, &lt;:Any})
+    haskey(options, &quot;scale_factor&quot;) &amp;&amp; (discipline.scale_factor = Float64(options[&quot;scale_factor&quot;]))
+    haskey(options, &quot;offset&quot;) &amp;&amp; (discipline.offset = Float64(options[&quot;offset&quot;]))
+end</code></pre><h2 id="Advanced-Topics"><a class="docs-heading-anchor" href="#Advanced-Topics">Advanced Topics</a><a id="Advanced-Topics-1"></a><a class="docs-heading-anchor-permalink" href="#Advanced-Topics" title="Permalink"></a></h2><h3 id="Working-with-Arrays"><a class="docs-heading-anchor" href="#Working-with-Arrays">Working with Arrays</a><a id="Working-with-Arrays-1"></a><a class="docs-heading-anchor-permalink" href="#Working-with-Arrays" title="Permalink"></a></h3><p>For vector and matrix inputs/outputs:</p><pre><code class="language-julia hljs">function Philote.setup!(discipline::VectorDiscipline)
+    # 3D vector input
+    Philote.add_input!(discipline, &quot;position&quot;, [3], &quot;m&quot;)
+
+    # 3x3 matrix output (stored as 9-element vector in row-major order)
+    Philote.add_output!(discipline, &quot;rotation&quot;, [9], &quot;unitless&quot;)
+end
+
+function Philote.compute(discipline::VectorDiscipline,
+                         inputs::Dict{String, &lt;:AbstractArray{Float64}})
+    pos = inputs[&quot;position&quot;]  # length-3 array
+    x, y, z = pos[1], pos[2], pos[3]
+
+    # Compute 3x3 matrix and flatten
+    rotation_matrix = compute_rotation(x, y, z)  # returns 3x3 matrix
+    rotation_flat = vec(transpose(rotation_matrix))  # flatten to 9 elements
+
+    return Dict(&quot;rotation&quot; =&gt; rotation_flat)
+end</code></pre><h3 id="Sparse-Jacobians"><a class="docs-heading-anchor" href="#Sparse-Jacobians">Sparse Jacobians</a><a id="Sparse-Jacobians-1"></a><a class="docs-heading-anchor-permalink" href="#Sparse-Jacobians" title="Permalink"></a></h3><p>If not all outputs depend on all inputs, only declare the non-zero partials:</p><pre><code class="language-julia hljs">function Philote.setup!(discipline::SparseDiscipline)
+    Philote.add_input!(discipline, &quot;x1&quot;, [1], &quot;m&quot;)
+    Philote.add_input!(discipline, &quot;x2&quot;, [1], &quot;m&quot;)
+    Philote.add_output!(discipline, &quot;y1&quot;, [1], &quot;m&quot;)
+    Philote.add_output!(discipline, &quot;y2&quot;, [1], &quot;m&quot;)
+
+    # y1 only depends on x1
+    Philote.declare_partials!(discipline, &quot;y1&quot;, &quot;x1&quot;)
+
+    # y2 depends on both
+    Philote.declare_partials!(discipline, &quot;y2&quot;, &quot;x1&quot;)
+    Philote.declare_partials!(discipline, &quot;y2&quot;, &quot;x2&quot;)
+end</code></pre><p>This tells the optimization framework that ∂y1/∂x2 is zero, avoiding unnecessary computations.</p><h3 id="Gradient-Checking"><a class="docs-heading-anchor" href="#Gradient-Checking">Gradient Checking</a><a id="Gradient-Checking-1"></a><a class="docs-heading-anchor-permalink" href="#Gradient-Checking" title="Permalink"></a></h3><p>Always verify your analytic gradients against finite differences:</p><pre><code class="language-julia hljs">function check_partials(discipline, inputs; epsilon=1e-6, tolerance=1e-5)
+    analytic = Philote.compute_partials(discipline, inputs)
+
+    for (out_name, out_partials) in analytic
+        for (in_name, analytic_grad) in out_partials
+            # Perturb input
+            inputs_pert = copy(inputs)
+            inputs_pert[in_name] = inputs[in_name] .+ epsilon
+
+            # Finite difference
+            f0 = Philote.compute(discipline, inputs)[out_name]
+            f1 = Philote.compute(discipline, inputs_pert)[out_name]
+            fd_grad = (f1 .- f0) ./ epsilon
+
+            # Check error
+            error = maximum(abs.(analytic_grad .- fd_grad))
+            if error &gt; tolerance
+                @warn &quot;Gradient mismatch for ∂$out_name/∂$in_name&quot; error
+            else
+                @info &quot;✓ ∂$out_name/∂$in_name verified&quot; error
+            end
+        end
+    end
+end</code></pre><h3 id="Performance-Tips"><a class="docs-heading-anchor" href="#Performance-Tips">Performance Tips</a><a id="Performance-Tips-1"></a><a class="docs-heading-anchor-permalink" href="#Performance-Tips" title="Permalink"></a></h3><ol><li><strong>Avoid allocations in <code>compute()</code></strong>: Pre-allocate arrays if possible</li><li><strong>Use <code>@inbounds</code></strong>: When you&#39;re sure array accesses are safe</li><li><strong>Consider <code>@simd</code></strong>: For vectorizable loops</li><li><strong>Type stability</strong>: Ensure all functions return consistent types</li></ol><p>Example of optimized compute:</p><pre><code class="language-julia hljs">function Philote.compute(discipline::OptimizedDiscipline,
+                         inputs::Dict{String, &lt;:AbstractArray{Float64}})
+    x = inputs[&quot;x&quot;]
+    n = length(x)
+
+    # Pre-allocate output
+    y = Vector{Float64}(undef, n)
+
+    # Vectorized loop
+    @inbounds @simd for i in 1:n
+        y[i] = x[i]^2 + 2.0 * x[i]
+    end
+
+    return Dict(&quot;y&quot; =&gt; y)
+end</code></pre><h3 id="Using-Automatic-Differentiation"><a class="docs-heading-anchor" href="#Using-Automatic-Differentiation">Using Automatic Differentiation</a><a id="Using-Automatic-Differentiation-1"></a><a class="docs-heading-anchor-permalink" href="#Using-Automatic-Differentiation" title="Permalink"></a></h3><p>For complex functions, consider using automatic differentiation:</p><pre><code class="language-julia hljs">using ForwardDiff
+
+function Philote.compute_partials(discipline::ComplexDiscipline,
+                                   inputs::Dict{String, &lt;:AbstractArray{Float64}})
+    # Define a function that computes the output for a given input
+    function f(x_val)
+        temp_inputs = copy(inputs)
+        temp_inputs[&quot;x&quot;] = [x_val]
+        return Philote.compute(discipline, temp_inputs)[&quot;y&quot;][1]
+    end
+
+    # Use ForwardDiff to compute derivative
+    x = inputs[&quot;x&quot;][1]
+    dy_dx = ForwardDiff.derivative(f, x)
+
+    return Dict(&quot;y&quot; =&gt; Dict(&quot;x&quot; =&gt; [dy_dx]))
+end</code></pre><h2 id="Common-Patterns"><a class="docs-heading-anchor" href="#Common-Patterns">Common Patterns</a><a id="Common-Patterns-1"></a><a class="docs-heading-anchor-permalink" href="#Common-Patterns" title="Permalink"></a></h2><h3 id="Multiple-Inputs-and-Outputs"><a class="docs-heading-anchor" href="#Multiple-Inputs-and-Outputs">Multiple Inputs and Outputs</a><a id="Multiple-Inputs-and-Outputs-1"></a><a class="docs-heading-anchor-permalink" href="#Multiple-Inputs-and-Outputs" title="Permalink"></a></h3><pre><code class="language-julia hljs">function Philote.setup!(discipline::MultiIODiscipline)
+    # Multiple inputs
+    Philote.add_input!(discipline, &quot;mach&quot;, [1], &quot;unitless&quot;)
+    Philote.add_input!(discipline, &quot;alpha&quot;, [1], &quot;deg&quot;)
+    Philote.add_input!(discipline, &quot;altitude&quot;, [1], &quot;m&quot;)
+
+    # Multiple outputs
+    Philote.add_output!(discipline, &quot;lift&quot;, [1], &quot;N&quot;)
+    Philote.add_output!(discipline, &quot;drag&quot;, [1], &quot;N&quot;)
+    Philote.add_output!(discipline, &quot;moment&quot;, [1], &quot;N*m&quot;)
+end</code></pre><h3 id="Conditional-Logic"><a class="docs-heading-anchor" href="#Conditional-Logic">Conditional Logic</a><a id="Conditional-Logic-1"></a><a class="docs-heading-anchor-permalink" href="#Conditional-Logic" title="Permalink"></a></h3><pre><code class="language-julia hljs">function Philote.compute(discipline::ConditionalDiscipline,
+                         inputs::Dict{String, &lt;:AbstractArray{Float64}})
+    x = inputs[&quot;x&quot;][1]
+
+    # Different computation based on input value
+    if x &lt; 0.0
+        y = -x^2
+    else
+        y = sqrt(x)
+    end
+
+    return Dict(&quot;y&quot; =&gt; [y])
+end</code></pre><h3 id="Calling-External-Functions"><a class="docs-heading-anchor" href="#Calling-External-Functions">Calling External Functions</a><a id="Calling-External-Functions-1"></a><a class="docs-heading-anchor-permalink" href="#Calling-External-Functions" title="Permalink"></a></h3><pre><code class="language-julia hljs">function Philote.compute(discipline::ExternalDiscipline,
+                         inputs::Dict{String, &lt;:AbstractArray{Float64}})
+    # Call some external library or complex function
+    result = my_external_function(inputs[&quot;x&quot;], discipline.config)
+
+    return Dict(&quot;output&quot; =&gt; [result])
+end</code></pre><h2 id="Best-Practices"><a class="docs-heading-anchor" href="#Best-Practices">Best Practices</a><a id="Best-Practices-1"></a><a class="docs-heading-anchor-permalink" href="#Best-Practices" title="Permalink"></a></h2><ol><li><strong>Always implement gradients</strong>: Critical for optimization performance</li><li><strong>Check gradient accuracy</strong>: Use finite differences to verify</li><li><strong>Document your math</strong>: Include formulas in docstrings</li><li><strong>Handle edge cases</strong>: Check for division by zero, domain errors, etc.</li><li><strong>Use consistent units</strong>: Document and stick to a unit system</li><li><strong>Test thoroughly</strong>: Write unit tests for your disciplines</li><li><strong>Version your disciplines</strong>: Use semantic versioning in metadata</li></ol><h2 id="Troubleshooting"><a class="docs-heading-anchor" href="#Troubleshooting">Troubleshooting</a><a id="Troubleshooting-1"></a><a class="docs-heading-anchor-permalink" href="#Troubleshooting" title="Permalink"></a></h2><h3 id="&quot;KeyError&quot;-when-accessing-inputs"><a class="docs-heading-anchor" href="#&quot;KeyError&quot;-when-accessing-inputs">&quot;KeyError&quot; when accessing inputs</a><a id="&quot;KeyError&quot;-when-accessing-inputs-1"></a><a class="docs-heading-anchor-permalink" href="#&quot;KeyError&quot;-when-accessing-inputs" title="Permalink"></a></h3><p>Make sure the input name in <code>compute()</code> matches exactly what you declared in <code>setup!()</code>:</p><pre><code class="language-julia hljs"># In setup!:
+Philote.add_input!(discipline, &quot;velocity&quot;, [1], &quot;m/s&quot;)
+
+# In compute (must match exactly):
+v = inputs[&quot;velocity&quot;]  # ✓ Correct
+v = inputs[&quot;vel&quot;]        # ✗ KeyError</code></pre><h3 id="Gradient-errors"><a class="docs-heading-anchor" href="#Gradient-errors">Gradient errors</a><a id="Gradient-errors-1"></a><a class="docs-heading-anchor-permalink" href="#Gradient-errors" title="Permalink"></a></h3><p>If optimization reports gradient errors:</p><ol><li>Verify partials with finite differences</li><li>Check for typos in partial derivative formulas</li><li>Ensure you&#39;re returning the correct dictionary structure</li><li>Make sure all declared partials are actually returned</li></ol><h3 id="Performance-issues"><a class="docs-heading-anchor" href="#Performance-issues">Performance issues</a><a id="Performance-issues-1"></a><a class="docs-heading-anchor-permalink" href="#Performance-issues" title="Permalink"></a></h3><p>If <code>compute()</code> is slow:</p><ol><li>Profile your code with <code>@time</code> or <code>@benchmark</code></li><li>Check for type instabilities with <code>@code_warntype</code></li><li>Avoid unnecessary allocations</li><li>Consider pre-computing expensive operations</li></ol><h2 id="Next-Steps"><a class="docs-heading-anchor" href="#Next-Steps">Next Steps</a><a id="Next-Steps-1"></a><a class="docs-heading-anchor-permalink" href="#Next-Steps" title="Permalink"></a></h2><ul><li>Learn about <a href="../implicit_disciplines/#implicit_disciplines">Implicit Disciplines</a> for iterative solvers</li><li>See <a href="../integration/#integration">Integration</a> to serve your discipline via gRPC</li><li>Check the <a href="../api/#API-Reference">API Reference</a> for complete function signatures</li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../tutorial/">« Tutorial</a><a class="docs-footer-nextpage" href="../implicit_disciplines/">Implicit Disciplines »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.15.0 on <span class="colophon-date" title="Monday 3 November 2025 04:57">Monday 3 November 2025</span>. Using Julia version 1.12.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
