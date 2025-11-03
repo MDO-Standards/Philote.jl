@@ -1,0 +1,40 @@
+# JuliaFormatter configuration for Philote.jl
+
+# Use the default Blue style with some customizations
+style = "blue"
+
+# Indent with 4 spaces
+indent = 4
+
+# Maximum line length before formatting attempts to wrap
+margin = 92
+
+# Always use Unix line endings
+always_use_return = false
+
+# Format docstrings
+format_docstrings = true
+
+# Align struct fields
+align_struct_field = false
+
+# Align assignment operators
+align_assignment = false
+
+# Align conditional operators
+align_conditional = false
+
+# Always add trailing commas in multi-line expressions
+always_for_in = true
+
+# Remove extra blank lines
+remove_extra_newlines = true
+
+# Whitespace in typedefs
+whitespace_typedefs = true
+
+# Whitespace around operators
+whitespace_ops_in_indices = true
+
+# Normalize line endings
+normalize_line_endings = "unix"
