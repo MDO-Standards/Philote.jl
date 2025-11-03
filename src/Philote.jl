@@ -1,11 +1,11 @@
 """
     Philote
 
-Julia interface for creating Philote MDO disciplines that can be wrapped
-by C++ servers using the Julia embedding API.
+Julia interface for creating Philote MDO disciplines.
 
 This module defines the interface that Julia disciplines must implement
-to be compatible with the Philote-Cpp wrapper.
+to be compatible with the Philote framework. Disciplines can be integrated
+with Python and other languages via the Philote-Python wrapper using juliacall.
 """
 module Philote
 
@@ -51,26 +51,14 @@ Implicit disciplines must implement:
 abstract type ImplicitDiscipline <: AbstractDiscipline end
 
 # Metadata storage for discipline configuration
-mutable struct DisciplineMetadata
-    inputs::Dict{String, Tuple{Vector{Int64}, String}}  # name => (shape, units)
-    outputs::Dict{String, Tuple{Vector{Int64}, String}}
-    residuals::Dict{String, Tuple{Vector{Int64}, String}}
-    options::Dict{String, String}  # name => type
-    partials::Vector{Tuple{String, String}}  # (output, input) pairs
-    name::String
-    version::String
-end
-
-function DisciplineMetadata()
-    DisciplineMetadata(
-        Dict{String, Tuple{Vector{Int64}, String}}(),
-        Dict{String, Tuple{Vector{Int64}, String}}(),
-        Dict{String, Tuple{Vector{Int64}, String}}(),
-        Dict{String, String}(),
-        Vector{Tuple{String, String}}(),
-        "UnnamedDiscipline",
-        "0.1.0"
-    )
+Base.@kwdef mutable struct DisciplineMetadata
+    inputs::Dict{String, Tuple{Vector{Int}, String}} = Dict()  # name => (shape, units)
+    outputs::Dict{String, Tuple{Vector{Int}, String}} = Dict()
+    residuals::Dict{String, Tuple{Vector{Int}, String}} = Dict()
+    options::Dict{String, String} = Dict()  # name => type
+    partials::Vector{Tuple{String, String}} = Vector{Tuple{String, String}}()  # (output, input) pairs
+    name::String = "UnnamedDiscipline"
+    version::String = "0.1.0"
 end
 
 # Global metadata storage keyed by discipline instance
