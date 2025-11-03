@@ -1,45 +1,45 @@
-.idea/
-.claude/
-cpp/build/
-
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
 *.so
-*.dylib
-*.dll
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Fortran module files
-*.mod
-*.smod
+# Virtual environments
+venv/
+ENV/
+env/
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Executables
-*.exe
-*.out
-*.app
+# OS
+.DS_Store
+Thumbs.db
 
-# debug information files
-*.dwo
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
