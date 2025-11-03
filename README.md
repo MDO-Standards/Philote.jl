@@ -1,31 +1,29 @@
 # Philote.jl
 
-> **Note**: This repository will be renamed to `Philote.jl` in the future.
-
 Pure Julia interface for implementing Philote MDO (Multidisciplinary Design Optimization) disciplines.
+
+[![CI](https://github.com/MDO-Standards/Philote-Julia/actions/workflows/ci.yml/badge.svg)](https://github.com/MDO-Standards/Philote-Julia/actions/workflows/ci.yml)
 
 ## Overview
 
 Philote.jl provides a Julia interface for creating analysis disciplines that can be used in MDO frameworks. It defines abstract types and a standardized API for both explicit and implicit disciplines.
 
-**For serving Julia disciplines via gRPC**, see [Philote-Python](https://github.com/mdo-standards/Philote-Python) which provides Python wrappers and server infrastructure.
+**For serving Julia disciplines via gRPC**, see [Philote-Python](https://github.com/MDO-Standards/Philote-Python) which provides Python wrappers and server infrastructure using juliacall.
 
 ## Installation
+
+### From Git
+
+```julia
+using Pkg
+Pkg.add(url="https://github.com/MDO-Standards/Philote-Julia.git")
+```
 
 ### From Local Directory (Development)
 
 ```julia
 using Pkg
 Pkg.develop(path="/path/to/Philote-Julia")
-```
-
-### From Git
-
-Once published or made available via Git:
-
-```julia
-using Pkg
-Pkg.add(url="https://github.com/yourusername/Philote.jl")
 ```
 
 ## Quick Start
@@ -279,9 +277,31 @@ Philote-Julia/
 - ⏳ Additional examples and documentation
 - ⏳ Performance benchmarks
 
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: `LoadError: ArgumentError: Package Philote not found`
+- **Solution**: Make sure you've added the package using `Pkg.add(url="...")` or `Pkg.develop(path="...")`
+
+**Issue**: `Shape dimensions must be positive integers`
+- **Solution**: When declaring inputs/outputs with `add_input!` or `add_output!`, ensure all shape dimensions are positive. Use `[1]` for scalars, `[3]` for vectors, `[2, 3]` for matrices.
+
+**Issue**: `compute_residuals must be implemented`
+- **Solution**: For implicit disciplines, you must implement all required methods: `setup!`, `compute_residuals`, `solve_residuals`, and optionally `residual_partials`.
+
+**Issue**: Tests failing with Julia version errors
+- **Solution**: This package supports Julia 1.6-1.11. Ensure you're using a compatible version with `julia --version`.
+
+### Getting Help
+
+- Check the [examples](examples/) directory for working code
+- Review the [API documentation](src/Philote.jl)
+- Open an issue on GitHub for bugs or questions
+
 ## Related Projects
 
-- **[Philote-Python](https://github.com/mdo-standards/Philote-Python)** - Python implementation with Julia wrapper support
+- **[Philote-Python](https://github.com/MDO-Standards/Philote-Python)** - Python implementation with Julia wrapper support
 - **Philote-Cpp** - C++ implementation with protocol definitions
 
 ## Contributing

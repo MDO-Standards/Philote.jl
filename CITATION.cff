@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Philote.jl: Julia Interface for MDO Disciplines"
+abstract: "Pure Julia interface for implementing Philote MDO (Multidisciplinary Design Optimization) disciplines with support for both explicit and implicit formulations."
+authors:
+  - family-names: "Lupp"
+    given-names: "Christopher"
+repository-code: "https://github.com/MDO-Standards/Philote-Julia"
+url: "https://github.com/MDO-Standards/Philote-Julia"
+license: Apache-2.0
+version: 0.1.0
+date-released: 2025-01-01
+keywords:
+  - "multidisciplinary design optimization"
+  - "MDO"
+  - "optimization"
+  - "engineering"
+  - "Julia"
+  - "disciplines"
