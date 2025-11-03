@@ -100,25 +100,23 @@ function Philote.set_options!(discipline::QuadraticImplicitDiscipline, options::
 end
 
 """
-    compute_residuals(discipline::QuadraticImplicitDiscipline, inputs::Dict)
+    compute_residuals(discipline::QuadraticImplicitDiscipline, inputs::Dict, outputs::Dict)
 
 Compute the residual R(x) = ax² + bx + c given current values of inputs and outputs.
 
-Note: For implicit disciplines, both inputs and the current guess for outputs
-are needed to compute residuals. In this simplified interface, we expect
-the output 'x' to be passed in the inputs dict.
+For implicit disciplines, both inputs and the current guess for outputs
+are needed to compute residuals.
 """
 function Philote.compute_residuals(discipline::QuadraticImplicitDiscipline,
-                                   inputs::Dict{String, <:AbstractArray{Float64}})
-    # Extract coefficients
+                                   inputs::Dict{String, <:AbstractArray{Float64}},
+                                   outputs::Dict{String, <:AbstractArray{Float64}})
+    # Extract coefficients from inputs
     a = inputs["a"][1]
     b = inputs["b"][1]
     c = inputs["c"][1]
 
     # Extract current value of x (output/state variable)
-    # In a real application, this might come from a separate outputs dict
-    # For now, we'll assume it's in inputs with a special key or use a default guess
-    x = get(inputs, "x", [0.0])[1]
+    x = outputs["x"][1]
 
     # Compute residual: R = ax² + bx + c
     R = a * x^2 + b * x + c
@@ -127,17 +125,19 @@ function Philote.compute_residuals(discipline::QuadraticImplicitDiscipline,
 end
 
 """
-    solve_residuals(discipline::QuadraticImplicitDiscipline, inputs::Dict)
+    solve_residuals(discipline::QuadraticImplicitDiscipline, inputs::Dict, outputs::Dict)
 
 Solve for x that makes the residual zero using the quadratic formula.
+Modifies the outputs dictionary in place.
 
 For ax² + bx + c = 0:
     x = (-b ± sqrt(b² - 4ac)) / (2a)
 
-We return the positive root (using +).
+We use the positive root (using +).
 """
 function Philote.solve_residuals(discipline::QuadraticImplicitDiscipline,
-                                 inputs::Dict{String, <:AbstractArray{Float64}})
+                                 inputs::Dict{String, <:AbstractArray{Float64}},
+                                 outputs::Dict{String, <:AbstractArray{Float64}})
     # Extract coefficients
     a = inputs["a"][1]
     b = inputs["b"][1]
@@ -167,11 +167,13 @@ function Philote.solve_residuals(discipline::QuadraticImplicitDiscipline,
         x = abs(x1) > abs(x2) ? x1 : x2
     end
 
-    return Dict("x" => [x])
+    # Modify outputs in place
+    outputs["x"][1] = x
+    return nothing
 end
 
 """
-    compute_residual_partials(discipline::QuadraticImplicitDiscipline, inputs::Dict)
+    residual_partials(discipline::QuadraticImplicitDiscipline, inputs::Dict, outputs::Dict)
 
 Compute the Jacobian of the residual with respect to inputs and outputs.
 
@@ -181,13 +183,14 @@ For R(x) = ax² + bx + c:
     dR/db = x
     dR/dc = 1
 """
-function Philote.compute_residual_partials(discipline::QuadraticImplicitDiscipline,
-                                          inputs::Dict{String, <:AbstractArray{Float64}})
+function Philote.residual_partials(discipline::QuadraticImplicitDiscipline,
+                                   inputs::Dict{String, <:AbstractArray{Float64}},
+                                   outputs::Dict{String, <:AbstractArray{Float64}})
     # Extract values
     a = inputs["a"][1]
     b = inputs["b"][1]
     c = inputs["c"][1]
-    x = get(inputs, "x", [0.0])[1]
+    x = outputs["x"][1]
 
     # Compute partials
     dR_dx = 2.0 * a * x + b
