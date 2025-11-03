@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from .config import PhiloteConfig
-from .servers import serve_explicit_discipline
+from .servers import serve_explicit_discipline, serve_implicit_discipline
 
 
 def main():
@@ -57,8 +57,7 @@ For more information, see the documentation in examples/configs/README.md
     if config.discipline.kind == "explicit":
         serve_explicit_discipline(config)
     elif config.discipline.kind == "implicit":
-        print("Error: Implicit disciplines not yet implemented", file=sys.stderr)
-        sys.exit(1)
+        serve_implicit_discipline(config)
     else:
         print(f"Error: Unknown discipline kind '{config.discipline.kind}'", file=sys.stderr)
         sys.exit(1)
