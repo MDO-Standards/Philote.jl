@@ -25,6 +25,7 @@ makedocs(;
         ],
         "API Reference" => "api.md",
     ],
+    checkdocs=:exports,  # Only check exported docstrings
 )
 
 deploydocs(;

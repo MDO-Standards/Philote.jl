@@ -50,7 +50,22 @@ Implicit disciplines must implement:
 """
 abstract type ImplicitDiscipline <: AbstractDiscipline end
 
-# Metadata storage for discipline configuration
+"""
+    DisciplineMetadata
+
+Stores metadata about a discipline's interface and configuration.
+
+# Fields
+- `inputs`: Dictionary mapping input names to (shape, units) tuples
+- `outputs`: Dictionary mapping output names to (shape, units) tuples
+- `residuals`: Dictionary mapping residual names to (shape, units) tuples
+- `options`: Dictionary mapping option names to type strings
+- `partials`: Vector of (output, input) pairs for declared derivatives
+- `name`: Discipline name (default: "UnnamedDiscipline")
+- `version`: Discipline version (default: "0.1.0")
+
+This struct is managed internally by Philote. Access it via `get_metadata(discipline)`.
+"""
 Base.@kwdef mutable struct DisciplineMetadata
     inputs::Dict{String, Tuple{Vector{Int}, String}} = Dict()  # name => (shape, units)
     outputs::Dict{String, Tuple{Vector{Int}, String}} = Dict()
