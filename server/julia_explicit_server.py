@@ -212,20 +212,32 @@ class JuliaExplicitServer(disciplines_pb2_grpc.DisciplineServiceServicer,
     def ComputeFunction(self, request_iterator, context):
         """Compute outputs from inputs."""
         print("[DEBUG] ComputeFunction called")
-        # Collect inputs from stream
-        inputs = {}
-        for msg in request_iterator:
-            print(f"[DEBUG] Received input chunk: {msg.name}, start={msg.start}, end={msg.end}, data={msg.data}")
-            if msg.name not in inputs:
-                # Get shape from metadata
-                shape = self.metadata.inputs[msg.name][0]
-                size = int(np.prod(shape))
-                inputs[msg.name] = np.zeros(size)
-                print(f"[DEBUG] Created input array for {msg.name}, shape={shape}, size={size}")
 
-            # Fill in chunk
-            inputs[msg.name][msg.start:msg.end+1] = msg.data
-            print(f"[DEBUG] Filled chunk for {msg.name}")
+        # Convert to list immediately to consume the iterator
+        print("[DEBUG] Converting request_iterator to list...")
+        messages = list(request_iterator)
+        print(f"[DEBUG] Received {len(messages)} messages total")
+
+        # Collect inputs from messages
+        inputs = {}
+        for idx, msg in enumerate(messages):
+            print(f"[DEBUG] Processing message {idx+1}/{len(messages)}: {msg.name}")
+            print(f"[DEBUG]   Message details: start={msg.start}, end={msg.end}, type={msg.type}")
+            print(f"[DEBUG]   Checking if {msg.name} in inputs...")
+            if msg.name not in inputs:
+                print(f"[DEBUG]   {msg.name} not in inputs, accessing metadata...")
+                print(f"[DEBUG]   metadata.inputs keys: {list(self.metadata.inputs.keys())}")
+                shape = self.metadata.inputs[msg.name][0]
+                print(f"[DEBUG]   Got shape: {shape}")
+                size = int(np.prod(shape))
+                print(f"[DEBUG]   Calculated size: {size}")
+                inputs[msg.name] = np.zeros(size)
+                print(f"[DEBUG]   Created array for {msg.name} with size {size}, shape {shape}")
+            print(f"[DEBUG]   About to access msg.data...")
+            data_vals = msg.data
+            print(f"[DEBUG]   Got msg.data: {data_vals}")
+            inputs[msg.name][msg.start:msg.end+1] = data_vals
+            print(f"[DEBUG]   Assigned to inputs[{msg.name}][{msg.start}:{msg.end+1}]")
 
         # Reshape inputs to proper shape
         print(f"[DEBUG] Reshaping inputs...")
@@ -234,15 +246,10 @@ class JuliaExplicitServer(disciplines_pb2_grpc.DisciplineServiceServicer,
             inputs[name] = inputs[name].reshape(shape)
             print(f"[DEBUG] Reshaped {name} to {shape}: {inputs[name]}")
 
-        # Convert to Julia dict (juliacall handles numpy → Julia conversion)
-        print(f"[DEBUG] Converting to Julia dict...")
-        jl_inputs = jl.Dict(inputs)
-        print(f"[DEBUG] Julia inputs: {jl_inputs}")
-
-        # Call Julia compute
-        print(f"[DEBUG] Calling Julia compute...")
-        jl_outputs = jl.seval('Philote.compute')(self.discipline, jl_inputs)
-        print(f"[DEBUG] Julia compute returned: {jl_outputs}")
+        # TEMPORARY: Skip Julia call to test if that's the issue
+        print(f"[DEBUG] Skipping Julia call, returning dummy output...")
+        jl_outputs = {"f_xy": np.array([5.0])}  # Dummy output
+        print(f"[DEBUG] Using dummy output: {jl_outputs}")
 
         # Stream outputs back to client
         print(f"[DEBUG] Streaming outputs...")
