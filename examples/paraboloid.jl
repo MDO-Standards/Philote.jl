@@ -8,7 +8,8 @@ This is the same example used in Philote-Cpp for consistency.
 """
 
 # Load the Philote module from the parent directory
-push!(LOAD_PATH, joinpath(@__DIR__, ".."))
+using Pkg
+Pkg.activate(joinpath(@__DIR__, ".."))
 using Philote
 
 """
