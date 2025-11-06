@@ -18,6 +18,6 @@ using .philote
 export DisciplineProperties, StreamOptions, OptionsList, DisciplineOptions
 export VariableMetaData, PartialsMetaData
 export VariableType, DataType
-export Array as PhiloteArray  # renamed to avoid conflict with Base.Array
+# Note: philote.var"#Array" is used directly in code to avoid conflict with Base.Array
 
 end  # module PhiloteProto

@@ -1,11 +1,8 @@
 # Base discipline client implementation
 
 using gRPCClient2
-using ..PhiloteProto
-using ..PhiloteProto.google.protobuf: Empty
-
-include("service_clients.jl")
-include("utils.jl")
+using .PhiloteProto
+using .PhiloteProto.google.protobuf: Empty
 
 """
     BaseDisciplineClient

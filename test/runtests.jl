@@ -217,10 +217,51 @@ end
     end
 
     @testset "Example Integration Tests" begin
-        # Test paraboloid example
-        include("../examples/paraboloid.jl")
+        # Test paraboloid example (skip Pkg.activate which doesn't work in test env)
+        # Define the discipline inline instead
+        mutable struct ParaboloidDisciplineTest <: Philote.ExplicitDiscipline
+            scale_factor::Float64
+            offset::Float64
+            ParaboloidDisciplineTest() = new(1.0, 0.0)
+        end
 
-        paraboloid = ParaboloidDiscipline()
+        function Philote.setup!(discipline::ParaboloidDisciplineTest)
+            Philote.add_option!(discipline, "scale_factor", "float")
+            Philote.add_option!(discipline, "offset", "float")
+            Philote.add_input!(discipline, "x", [1], "m")
+            Philote.add_input!(discipline, "y", [1], "m")
+            Philote.add_output!(discipline, "f_xy", [1], "m**2")
+            Philote.declare_partials!(discipline, "f_xy", "x")
+            Philote.declare_partials!(discipline, "f_xy", "y")
+            meta = Philote.get_metadata(discipline)
+            meta.name = "ParaboloidDiscipline"
+            meta.version = "0.1.0"
+        end
+
+        function Philote.compute(discipline::ParaboloidDisciplineTest, inputs::Dict{String,<:AbstractArray{Float64}})
+            x = inputs["x"][1]
+            y = inputs["y"][1]
+            f = (x - 3)^2 + x*y + (y + 4)^2 - 3
+            scaled = f * discipline.scale_factor + discipline.offset
+            return Dict("f_xy" => [scaled])
+        end
+
+        function Philote.compute_partials(discipline::ParaboloidDisciplineTest, inputs::Dict{String,<:AbstractArray{Float64}})
+            x = inputs["x"][1]
+            y = inputs["y"][1]
+            df_dx = 2.0 * (x - 3.0) + y
+            df_dy = x + 2.0 * (y + 4.0)
+            scaled_dx = df_dx * discipline.scale_factor
+            scaled_dy = df_dy * discipline.scale_factor
+            return Dict(
+                "f_xy" => Dict(
+                    "x" => [scaled_dx],
+                    "y" => [scaled_dy]
+                )
+            )
+        end
+
+        paraboloid = ParaboloidDisciplineTest()
         Philote.setup!(paraboloid)
 
         # Test metadata

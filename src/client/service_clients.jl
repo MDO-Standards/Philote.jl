@@ -2,8 +2,8 @@
 # These create gRPC clients for the Philote discipline services
 
 using gRPCClient2
-using ..PhiloteProto
-using ..PhiloteProto.google.protobuf: Empty
+using .PhiloteProto
+using .PhiloteProto.google.protobuf: Empty
 
 # DisciplineService clients
 

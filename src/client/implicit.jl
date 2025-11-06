@@ -1,12 +1,7 @@
 # Implicit discipline client implementation
 
 using gRPCClient2
-using ..PhiloteProto
-
-include("abstract.jl")
-include("base.jl")
-include("service_clients.jl")
-include("utils.jl")
+using .PhiloteProto
 
 """
     ImplicitClient <: AbstractImplicitClient

@@ -1,6 +1,6 @@
 # Utility functions for Philote gRPC clients
 
-using ..PhiloteProto
+using .PhiloteProto
 
 """
     create_array_message(name::String, data::AbstractVector{Float64};
