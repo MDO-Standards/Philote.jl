@@ -1,11 +1,30 @@
 """
     Philote
 
-Julia interface for creating Philote MDO disciplines.
+Julia interface for creating Philote MDO disciplines and connecting to them via gRPC.
 
-This module defines the interface that Julia disciplines must implement
-to be compatible with the Philote framework. Disciplines can be integrated
-with Python and other languages via the Philote-Python wrapper using juliacall.
+This module defines:
+1. The interface for implementing Julia disciplines
+2. gRPC clients for connecting to Philote discipline servers
+
+# Discipline Implementation
+Disciplines can be integrated with Python and other languages via the Philote-Python
+wrapper using juliacall.
+
+# gRPC Clients
+Use the Client submodule to connect to remote Philote disciplines:
+```julia
+using Philote
+using Philote.Client
+
+# Initialize gRPC
+grpc_init()
+
+# Connect to a discipline server
+client = ExplicitClient("localhost", 50051)
+setup!(client)
+outputs = compute(client, inputs)
+```
 """
 module Philote
 
@@ -385,4 +404,38 @@ function residual_partials(
     return Dict{String, Dict{String, Vector{Float64}}}()
 end
 
-end # module
+# Client submodule for gRPC clients
+module Client
+
+using gRPCClient2
+export grpc_init, grpc_shutdown
+
+# Include protocol buffer definitions
+include("proto_includes.jl")
+using .PhiloteProto
+
+# Include client implementations
+include("client/abstract.jl")
+include("client/service_clients.jl")
+include("client/utils.jl")
+include("client/base.jl")
+include("client/explicit.jl")
+include("client/implicit.jl")
+
+# Export client types
+export AbstractDisciplineClient, AbstractExplicitClient, AbstractImplicitClient
+export ExplicitClient, ImplicitClient
+
+# Export client methods
+export get_discipline_info!, set_stream_options!, get_available_options
+export set_options!, setup!
+export get_variable_definitions!, get_partial_definitions!
+export compute, compute_partials
+export compute_residuals, solve_residuals, compute_residual_gradients
+
+# Export protocol buffer types
+export DisciplineProperties, StreamOptions, VariableMetaData, PartialsMetaData
+
+end # module Client
+
+end # module Philote

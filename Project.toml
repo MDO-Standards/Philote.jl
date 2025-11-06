@@ -8,6 +8,8 @@ repository = "https://github.com/MDO-Standards/Philote-Julia.git"
 keywords = ["MDO", "multidisciplinary", "optimization", "engineering", "design"]
 
 [deps]
+ProtoBuf = "3349acd9-ac6a-5e09-bcdb-63829b23a429"
+gRPCClient2 = "655190db-73ea-4678-9984-625c41784ebb"
 
 [compat]
 julia = "1.6, 1.7, 1.8, 1.9, 1.10, 1.11"
