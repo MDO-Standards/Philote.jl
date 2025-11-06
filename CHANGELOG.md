@@ -30,9 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Protocol buffer type exports
 - Test compatibility with package environment
 
-## [0.1.0] - 2024-11-04
-
-### Added
+### Initial Features (Pre-release)
 - Initial Julia interface for Philote disciplines
 - Abstract types: `AbstractDiscipline`, `ExplicitDiscipline`, `ImplicitDiscipline`
 - Core API for discipline implementation
@@ -44,5 +42,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI/CD workflows for linting, testing, and coverage
 - Integration with Philote-Python via juliacall
 
-[Unreleased]: https://github.com/MDO-Standards/Philote-Julia/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/MDO-Standards/Philote-Julia/releases/tag/v0.1.0
+[Unreleased]: https://github.com/MDO-Standards/Philote-Julia/compare/v0.0.0...HEAD
