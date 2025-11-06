@@ -268,13 +268,24 @@ See complete examples:
 - `examples/paraboloid_client.jl` - Explicit discipline client
 - `examples/quadratic_client.jl` - Implicit discipline client
 
-### Performance
+### gRPC Implementation
 
-The Julia clients leverage [gRPCClient2.jl](https://github.com/csvance/gRPCClient2.jl) for high-performance gRPC communication:
+The Julia clients are built on [gRPCClient2.jl](https://github.com/csvance/gRPCClient2.jl), a high-performance gRPC client library for Julia.
+
+**About gRPCClient2.jl:**
+- Pure Julia gRPC client implementation using libcurl's HTTP/2 support
+- Significantly faster than existing Julia gRPC alternatives
+- Supports bidirectional streaming for efficient data transfer
+- Minimal dependencies and straightforward API
+- Not yet registered in Julia's General registry (installed from GitHub)
+
+**Performance characteristics:**
 - ~8,000+ requests/sec for small messages
 - ~500+ requests/sec for large arrays (~1.6 MB)
 - Concurrent request support
 - Streaming for large data transfers
+
+**Note:** gRPCClient2.jl is an unregistered package. During installation, it will be automatically fetched from GitHub. This is handled transparently by the package manager.
 
 ### Client vs Server
 
