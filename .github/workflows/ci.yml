@@ -22,7 +22,7 @@ jobs:
       matrix:
         julia-version:
           - '1.11'
-          - '1'     # Latest stable
+          - '1.12'
 
     steps:
       - uses: actions/checkout@v4
