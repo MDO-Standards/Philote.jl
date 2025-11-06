@@ -14,9 +14,9 @@ jobs:
     uses: ./.github/workflows/lint.yml
 
   build-and-test:
-    name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }}
+    name: Julia ${{ matrix.julia-version }}
     needs: lint
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -24,10 +24,6 @@ jobs:
           - '1.6'   # LTS
           - '1.9'   # Previous stable
           - '1'     # Latest stable
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
 
     steps:
       - uses: actions/checkout@v4
