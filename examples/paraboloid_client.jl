@@ -83,7 +83,9 @@ function main()
         variables = get_variable_definitions!(client)
         println("✓ Variables:")
         for var in variables
-            println("  - $(var.name): shape=$(var.shape), units=$(var.units), type=$(var.type)")
+            println(
+                "  - $(var.name): shape=$(var.shape), units=$(var.units), type=$(var.type)"
+            )
         end
         println()
 
@@ -98,23 +100,17 @@ function main()
 
         # Compute function at several points
         println("Computing function values...")
-        test_points = [
-            (x=0.0, y=0.0),
-            (x=3.0, y=-4.0),
-            (x=1.0, y=2.0),
-        ]
+        test_points = [(x=0.0, y=0.0), (x=3.0, y=-4.0), (x=1.0, y=2.0)]
 
         for point in test_points
-            inputs = Dict(
-                "x" => [point.x],
-                "y" => [point.y]
-            )
+            inputs = Dict("x" => [point.x], "y" => [point.y])
 
             outputs = compute(client, inputs)
             f_xy = outputs["f_xy"][1]
 
             # Expected value with options: ((x-3)^2 + x*y + (y+4)^2 - 3) * 2.0 + 10.0
-            expected = ((point.x - 3)^2 + point.x * point.y + (point.y + 4)^2 - 3) * 2.0 + 10.0
+            expected =
+                ((point.x - 3)^2 + point.x * point.y + (point.y + 4)^2 - 3) * 2.0 + 10.0
 
             println("  f($(point.x), $(point.y)) = $f_xy (expected: $expected)")
         end
@@ -149,9 +145,13 @@ function main()
     catch e
         println("✗ Error: $e")
         println()
-        println("Make sure a Philote Paraboloid discipline server is running at $host:$port")
+        println(
+            "Make sure a Philote Paraboloid discipline server is running at $host:$port"
+        )
         println("Start one using:")
-        println("  philote-julia-serve examples/paraboloid.jl ParaboloidDiscipline --port $port")
+        println(
+            "  philote-julia-serve examples/paraboloid.jl ParaboloidDiscipline --port $port"
+        )
         rethrow(e)
     end
 end

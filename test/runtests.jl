@@ -238,7 +238,10 @@ end
             meta.version = "0.1.0"
         end
 
-        function Philote.compute(discipline::ParaboloidDisciplineTest, inputs::Dict{String,<:AbstractArray{Float64}})
+        function Philote.compute(
+            discipline::ParaboloidDisciplineTest,
+            inputs::Dict{String, <:AbstractArray{Float64}},
+        )
             x = inputs["x"][1]
             y = inputs["y"][1]
             f = (x - 3)^2 + x*y + (y + 4)^2 - 3
@@ -246,19 +249,17 @@ end
             return Dict("f_xy" => [scaled])
         end
 
-        function Philote.compute_partials(discipline::ParaboloidDisciplineTest, inputs::Dict{String,<:AbstractArray{Float64}})
+        function Philote.compute_partials(
+            discipline::ParaboloidDisciplineTest,
+            inputs::Dict{String, <:AbstractArray{Float64}},
+        )
             x = inputs["x"][1]
             y = inputs["y"][1]
             df_dx = 2.0 * (x - 3.0) + y
             df_dy = x + 2.0 * (y + 4.0)
             scaled_dx = df_dx * discipline.scale_factor
             scaled_dy = df_dy * discipline.scale_factor
-            return Dict(
-                "f_xy" => Dict(
-                    "x" => [scaled_dx],
-                    "y" => [scaled_dy]
-                )
-            )
+            return Dict("f_xy" => Dict("x" => [scaled_dx], "y" => [scaled_dy]))
         end
 
         paraboloid = ParaboloidDisciplineTest()

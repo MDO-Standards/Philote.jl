@@ -11,12 +11,14 @@ Client for interacting with implicit Philote disciplines via gRPC.
 Implicit disciplines solve residual equations: `R(inputs, outputs) = 0`
 
 # Fields
-- `base::BaseDisciplineClient`: Base client for common operations
-- `residuals_client`: gRPC client for ComputeResiduals
-- `solve_client`: gRPC client for SolveResiduals
-- `gradients_client`: gRPC client for ComputeResidualGradients
+
+  - `base::BaseDisciplineClient`: Base client for common operations
+  - `residuals_client`: gRPC client for ComputeResiduals
+  - `solve_client`: gRPC client for SolveResiduals
+  - `gradients_client`: gRPC client for ComputeResidualGradients
 
 # Example
+
 ```julia
 using Philote
 using Philote.Client
@@ -50,18 +52,30 @@ mutable struct ImplicitClient <: AbstractImplicitClient
     solve_client
     gradients_client
 
-    function ImplicitClient(host::String, port::Int; secure=false, deadline=10, keepalive=60)
-        base = BaseDisciplineClient(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
-        residuals_client = ImplicitService_ComputeResiduals_Client(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
-        solve_client = ImplicitService_SolveResiduals_Client(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
-        gradients_client = ImplicitService_ComputeResidualGradients_Client(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
+    function ImplicitClient(
+        host::String, port::Int; secure=false, deadline=10, keepalive=60
+    )
+        base = BaseDisciplineClient(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
+        residuals_client = ImplicitService_ComputeResiduals_Client(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
+        solve_client = ImplicitService_SolveResiduals_Client(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
+        gradients_client = ImplicitService_ComputeResidualGradients_Client(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
         return new(base, residuals_client, solve_client, gradients_client)
     end
 end
 
 # Forward base methods to the base client
 get_discipline_info!(client::ImplicitClient) = get_discipline_info!(client.base)
-set_stream_options!(client::ImplicitClient; kwargs...) = set_stream_options!(client.base; kwargs...)
+function set_stream_options!(client::ImplicitClient; kwargs...)
+    set_stream_options!(client.base; kwargs...)
+end
 get_available_options(client::ImplicitClient) = get_available_options(client.base)
 set_options!(client::ImplicitClient, options::Dict) = set_options!(client.base, options)
 setup!(client::ImplicitClient) = setup!(client.base)
@@ -78,14 +92,17 @@ Compute residuals R(inputs, outputs) for the implicit discipline.
 For implicit disciplines, residuals should equal zero when outputs satisfy the equations.
 
 # Arguments
-- `client`: Implicit discipline client
-- `inputs`: Dictionary mapping input variable names to Float64 vectors
-- `outputs`: Dictionary mapping output variable names to Float64 vectors
+
+  - `client`: Implicit discipline client
+  - `inputs`: Dictionary mapping input variable names to Float64 vectors
+  - `outputs`: Dictionary mapping output variable names to Float64 vectors
 
 # Returns
-- `Dict{String, Vector{Float64}}`: Dictionary mapping residual variable names to data vectors
+
+  - `Dict{String, Vector{Float64}}`: Dictionary mapping residual variable names to data vectors
 
 # Example
+
 ```julia
 inputs = Dict("a" => [1.0], "b" => [2.0], "c" => [-3.0])
 outputs = Dict("x" => [1.0], "y" => [2.0])
@@ -95,7 +112,7 @@ residuals = compute_residuals(client, inputs, outputs)
 function compute_residuals(
     client::ImplicitClient,
     inputs::Dict{String, <:AbstractVector{Float64}},
-    outputs::Dict{String, <:AbstractVector{Float64}}
+    outputs::Dict{String, <:AbstractVector{Float64}},
 )
     # Create channels
     request_channel = Channel{PhiloteProto.philote.var"#Array"}(16)
@@ -108,11 +125,15 @@ function compute_residuals(
     @async begin
         try
             for (name, data) in inputs
-                arr = create_array_message(name, data; type=PhiloteProto.philote.VariableType.kInput)
+                arr = create_array_message(
+                    name, data; type=PhiloteProto.philote.VariableType.kInput
+                )
                 put!(request_channel, arr)
             end
             for (name, data) in outputs
-                arr = create_array_message(name, data; type=PhiloteProto.philote.VariableType.kOutput)
+                arr = create_array_message(
+                    name, data; type=PhiloteProto.philote.VariableType.kOutput
+                )
                 put!(request_channel, arr)
             end
         finally
@@ -137,13 +158,16 @@ Solve for outputs such that R(inputs, outputs) = 0.
 This calls the discipline's nonlinear solver to find outputs that satisfy the residual equations.
 
 # Arguments
-- `client`: Implicit discipline client
-- `inputs`: Dictionary mapping input variable names to Float64 vectors
+
+  - `client`: Implicit discipline client
+  - `inputs`: Dictionary mapping input variable names to Float64 vectors
 
 # Returns
-- `Dict{String, Vector{Float64}}`: Dictionary mapping output variable names to solution vectors
+
+  - `Dict{String, Vector{Float64}}`: Dictionary mapping output variable names to solution vectors
 
 # Example
+
 ```julia
 # For a quadratic equation: ax² + bx + c = 0
 inputs = Dict("a" => [1.0], "b" => [2.0], "c" => [-3.0])
@@ -152,8 +176,7 @@ outputs = solve_residuals(client, inputs)
 ```
 """
 function solve_residuals(
-    client::ImplicitClient,
-    inputs::Dict{String, <:AbstractVector{Float64}}
+    client::ImplicitClient, inputs::Dict{String, <:AbstractVector{Float64}}
 )
     # Create channels
     request_channel = Channel{PhiloteProto.philote.var"#Array"}(16)
@@ -166,7 +189,9 @@ function solve_residuals(
     @async begin
         try
             for (name, data) in inputs
-                arr = create_array_message(name, data; type=PhiloteProto.philote.VariableType.kInput)
+                arr = create_array_message(
+                    name, data; type=PhiloteProto.philote.VariableType.kInput
+                )
                 put!(request_channel, arr)
             end
         finally
@@ -193,15 +218,18 @@ Compute the Jacobian of residuals with respect to inputs and outputs.
 For implicit disciplines, this computes ∂R/∂inputs and ∂R/∂outputs.
 
 # Arguments
-- `client`: Implicit discipline client
-- `inputs`: Dictionary mapping input variable names to Float64 vectors
-- `outputs`: Dictionary mapping output variable names to Float64 vectors
+
+  - `client`: Implicit discipline client
+  - `inputs`: Dictionary mapping input variable names to Float64 vectors
+  - `outputs`: Dictionary mapping output variable names to Float64 vectors
 
 # Returns
-- `Dict{String, Vector{Float64}}`: Dictionary mapping partial derivative names to data vectors
-  The keys follow the convention "residual_name:variable_name"
+
+  - `Dict{String, Vector{Float64}}`: Dictionary mapping partial derivative names to data vectors
+    The keys follow the convention "residual_name:variable_name"
 
 # Example
+
 ```julia
 inputs = Dict("a" => [1.0], "b" => [2.0], "c" => [-3.0])
 outputs = Dict("x" => [1.0])
@@ -214,7 +242,7 @@ gradients = compute_residual_gradients(client, inputs, outputs)
 function compute_residual_gradients(
     client::ImplicitClient,
     inputs::Dict{String, <:AbstractVector{Float64}},
-    outputs::Dict{String, <:AbstractVector{Float64}}
+    outputs::Dict{String, <:AbstractVector{Float64}},
 )
     # Create channels
     request_channel = Channel{PhiloteProto.philote.var"#Array"}(16)
@@ -227,11 +255,15 @@ function compute_residual_gradients(
     @async begin
         try
             for (name, data) in inputs
-                arr = create_array_message(name, data; type=PhiloteProto.philote.VariableType.kInput)
+                arr = create_array_message(
+                    name, data; type=PhiloteProto.philote.VariableType.kInput
+                )
                 put!(request_channel, arr)
             end
             for (name, data) in outputs
-                arr = create_array_message(name, data; type=PhiloteProto.philote.VariableType.kOutput)
+                arr = create_array_message(
+                    name, data; type=PhiloteProto.philote.VariableType.kOutput
+                )
                 put!(request_channel, arr)
             end
         finally

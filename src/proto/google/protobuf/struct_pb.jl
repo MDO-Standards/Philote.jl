@@ -10,26 +10,37 @@ abstract type var"##Abstract#Struct" end
 abstract type var"##Abstract#Value" end
 abstract type var"##Abstract#ListValue" end
 
-
 @enumx NullValue NULL_VALUE=0
 
 # Stub definitions for cyclic types
-struct var"##Stub#ListValue"{T1<:var"##Abstract#Value"} <: var"##Abstract#ListValue"
+struct var"##Stub#ListValue"{T1 <: var"##Abstract#Value"} <: var"##Abstract#ListValue"
     values::Vector{T1}
 end
 
-struct var"##Stub#Struct"{T1<:var"##Abstract#Value"} <: var"##Abstract#Struct"
-    fields::Dict{String,T1}
+struct var"##Stub#Struct"{T1 <: var"##Abstract#Value"} <: var"##Abstract#Struct"
+    fields::Dict{String, T1}
 end
 
 struct var"##Stub#Value" <: var"##Abstract#Value"
-    kind::Union{Nothing,OneOf{<:Union{NullValue.T,Float64,String,Bool,var"##Stub#Struct"{var"##Stub#Value"},var"##Stub#ListValue"{var"##Stub#Value"}}}}
+    kind::Union{
+        Nothing,
+        OneOf{
+            <:Union{
+                NullValue.T,
+                Float64,
+                String,
+                Bool,
+                var"##Stub#Struct"{var"##Stub#Value"},
+                var"##Stub#ListValue"{var"##Stub#Value"},
+            },
+        },
+    }
 end
 
 const ListValue = var"##Stub#ListValue"{var"##Stub#Value"}
-ListValue(;values = Vector{Value}()) = ListValue(values)
-PB.default_values(::Type{ListValue}) = (;values = Vector{Value}())
-PB.field_numbers(::Type{ListValue}) = (;values = 1)
+ListValue(; values=Vector{Value}()) = ListValue(values)
+PB.default_values(::Type{ListValue}) = (; values=Vector{Value}())
+PB.field_numbers(::Type{ListValue}) = (; values=1)
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:ListValue})
     values = PB.BufferedVector{Value}()
@@ -56,12 +67,12 @@ function PB._encoded_size(x::ListValue)
 end
 
 const Struct = var"##Stub#Struct"{var"##Stub#Value"}
-Struct(;fields = Dict{String,Value}()) = Struct(fields)
-PB.default_values(::Type{Struct}) = (;fields = Dict{String,Value}())
-PB.field_numbers(::Type{Struct}) = (;fields = 1)
+Struct(; fields=Dict{String, Value}()) = Struct(fields)
+PB.default_values(::Type{Struct}) = (; fields=Dict{String, Value}())
+PB.field_numbers(::Type{Struct}) = (; fields=1)
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:Struct})
-    fields = Dict{String,Value}()
+    fields = Dict{String, Value}()
     while !PB.message_done(d)
         field_number, wire_type = PB.decode_tag(d)
         if field_number == 1
@@ -85,12 +96,39 @@ function PB._encoded_size(x::Struct)
 end
 
 const Value = var"##Stub#Value"
-Value(;kind = nothing) = Value(kind)
-PB.oneof_field_types(::Type{Value}) = (;
-    kind = (;null_value=NullValue.T, number_value=Float64, string_value=String, bool_value=Bool, struct_value=Struct, list_value=ListValue),
-)
-PB.default_values(::Type{Value}) = (;null_value = NullValue.NULL_VALUE, number_value = zero(Float64), string_value = "", bool_value = false, struct_value = nothing, list_value = nothing)
-PB.field_numbers(::Type{Value}) = (;null_value = 1, number_value = 2, string_value = 3, bool_value = 4, struct_value = 5, list_value = 6)
+Value(; kind=nothing) = Value(kind)
+function PB.oneof_field_types(::Type{Value})
+    (;
+        kind=(;
+            null_value=NullValue.T,
+            number_value=Float64,
+            string_value=String,
+            bool_value=Bool,
+            struct_value=Struct,
+            list_value=ListValue,
+        ),
+    )
+end
+function PB.default_values(::Type{Value})
+    (;
+        null_value=NullValue.NULL_VALUE,
+        number_value=zero(Float64),
+        string_value="",
+        bool_value=false,
+        struct_value=nothing,
+        list_value=nothing,
+    )
+end
+function PB.field_numbers(::Type{Value})
+    (;
+        null_value=1,
+        number_value=2,
+        string_value=3,
+        bool_value=4,
+        struct_value=5,
+        list_value=6,
+    )
+end
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:Value})
     kind = nothing
@@ -117,7 +155,8 @@ end
 
 function PB.encode(e::PB.AbstractProtoEncoder, x::Value)
     initpos = position(e.io)
-    if isnothing(x.kind);
+    if isnothing(x.kind)
+        ;
     elseif x.kind.name === :null_value
         PB.encode(e, 1, x.kind[]::NullValue.T)
     elseif x.kind.name === :number_value
@@ -135,7 +174,8 @@ function PB.encode(e::PB.AbstractProtoEncoder, x::Value)
 end
 function PB._encoded_size(x::Value)
     encoded_size = 0
-    if isnothing(x.kind);
+    if isnothing(x.kind)
+        ;
     elseif x.kind.name === :null_value
         encoded_size += PB._encoded_size(x.kind[]::NullValue.T, 1)
     elseif x.kind.name === :number_value

@@ -14,7 +14,8 @@ Create a gRPC client for the GetInfo RPC of DisciplineService.
 Returns discipline properties.
 """
 function DisciplineService_GetInfo_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -23,7 +24,9 @@ function DisciplineService_GetInfo_Client(
     max_recieve_message_length=4*1024*1024,
 )
     return gRPCClient{Empty, false, DisciplineProperties, false}(
-        host, port, "/philote.DisciplineService/GetInfo";
+        host,
+        port,
+        "/philote.DisciplineService/GetInfo";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -39,7 +42,8 @@ end
 Create a gRPC client for the SetStreamOptions RPC of DisciplineService.
 """
 function DisciplineService_SetStreamOptions_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -48,7 +52,9 @@ function DisciplineService_SetStreamOptions_Client(
     max_recieve_message_length=4*1024*1024,
 )
     return gRPCClient{StreamOptions, false, Empty, false}(
-        host, port, "/philote.DisciplineService/SetStreamOptions";
+        host,
+        port,
+        "/philote.DisciplineService/SetStreamOptions";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -64,7 +70,8 @@ end
 Create a gRPC client for the GetAvailableOptions RPC of DisciplineService.
 """
 function DisciplineService_GetAvailableOptions_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -73,7 +80,9 @@ function DisciplineService_GetAvailableOptions_Client(
     max_recieve_message_length=4*1024*1024,
 )
     return gRPCClient{Empty, false, OptionsList, false}(
-        host, port, "/philote.DisciplineService/GetAvailableOptions";
+        host,
+        port,
+        "/philote.DisciplineService/GetAvailableOptions";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -89,7 +98,8 @@ end
 Create a gRPC client for the SetOptions RPC of DisciplineService.
 """
 function DisciplineService_SetOptions_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -98,7 +108,9 @@ function DisciplineService_SetOptions_Client(
     max_recieve_message_length=4*1024*1024,
 )
     return gRPCClient{DisciplineOptions, false, Empty, false}(
-        host, port, "/philote.DisciplineService/SetOptions";
+        host,
+        port,
+        "/philote.DisciplineService/SetOptions";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -114,7 +126,8 @@ end
 Create a gRPC client for the Setup RPC of DisciplineService.
 """
 function DisciplineService_Setup_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -123,7 +136,9 @@ function DisciplineService_Setup_Client(
     max_recieve_message_length=4*1024*1024,
 )
     return gRPCClient{Empty, false, Empty, false}(
-        host, port, "/philote.DisciplineService/Setup";
+        host,
+        port,
+        "/philote.DisciplineService/Setup";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -139,7 +154,8 @@ end
 Create a gRPC client for the GetVariableDefinitions RPC (server streaming).
 """
 function DisciplineService_GetVariableDefinitions_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -148,7 +164,9 @@ function DisciplineService_GetVariableDefinitions_Client(
     max_recieve_message_length=4*1024*1024,
 )
     return gRPCClient{Empty, false, VariableMetaData, true}(
-        host, port, "/philote.DisciplineService/GetVariableDefinitions";
+        host,
+        port,
+        "/philote.DisciplineService/GetVariableDefinitions";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -164,7 +182,8 @@ end
 Create a gRPC client for the GetPartialDefinitions RPC (server streaming).
 """
 function DisciplineService_GetPartialDefinitions_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -173,7 +192,9 @@ function DisciplineService_GetPartialDefinitions_Client(
     max_recieve_message_length=4*1024*1024,
 )
     return gRPCClient{Empty, false, PartialsMetaData, true}(
-        host, port, "/philote.DisciplineService/GetPartialDefinitions";
+        host,
+        port,
+        "/philote.DisciplineService/GetPartialDefinitions";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -191,7 +212,8 @@ end
 Create a gRPC client for the ComputeFunction RPC (bidirectional streaming).
 """
 function ExplicitService_ComputeFunction_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -199,8 +221,12 @@ function ExplicitService_ComputeFunction_Client(
     max_send_message_length=4*1024*1024,
     max_recieve_message_length=4*1024*1024,
 )
-    return gRPCClient{PhiloteProto.philote.var"#Array", true, PhiloteProto.philote.var"#Array", true}(
-        host, port, "/philote.ExplicitService/ComputeFunction";
+    return gRPCClient{
+        PhiloteProto.philote.var"#Array", true, PhiloteProto.philote.var"#Array", true
+    }(
+        host,
+        port,
+        "/philote.ExplicitService/ComputeFunction";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -216,7 +242,8 @@ end
 Create a gRPC client for the ComputeGradient RPC (bidirectional streaming).
 """
 function ExplicitService_ComputeGradient_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -224,8 +251,12 @@ function ExplicitService_ComputeGradient_Client(
     max_send_message_length=4*1024*1024,
     max_recieve_message_length=4*1024*1024,
 )
-    return gRPCClient{PhiloteProto.philote.var"#Array", true, PhiloteProto.philote.var"#Array", true}(
-        host, port, "/philote.ExplicitService/ComputeGradient";
+    return gRPCClient{
+        PhiloteProto.philote.var"#Array", true, PhiloteProto.philote.var"#Array", true
+    }(
+        host,
+        port,
+        "/philote.ExplicitService/ComputeGradient";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -243,7 +274,8 @@ end
 Create a gRPC client for the ComputeResiduals RPC (bidirectional streaming).
 """
 function ImplicitService_ComputeResiduals_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -251,8 +283,12 @@ function ImplicitService_ComputeResiduals_Client(
     max_send_message_length=4*1024*1024,
     max_recieve_message_length=4*1024*1024,
 )
-    return gRPCClient{PhiloteProto.philote.var"#Array", true, PhiloteProto.philote.var"#Array", true}(
-        host, port, "/philote.ImplicitService/ComputeResiduals";
+    return gRPCClient{
+        PhiloteProto.philote.var"#Array", true, PhiloteProto.philote.var"#Array", true
+    }(
+        host,
+        port,
+        "/philote.ImplicitService/ComputeResiduals";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -268,7 +304,8 @@ end
 Create a gRPC client for the SolveResiduals RPC (bidirectional streaming).
 """
 function ImplicitService_SolveResiduals_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -276,8 +313,12 @@ function ImplicitService_SolveResiduals_Client(
     max_send_message_length=4*1024*1024,
     max_recieve_message_length=4*1024*1024,
 )
-    return gRPCClient{PhiloteProto.philote.var"#Array", true, PhiloteProto.philote.var"#Array", true}(
-        host, port, "/philote.ImplicitService/SolveResiduals";
+    return gRPCClient{
+        PhiloteProto.philote.var"#Array", true, PhiloteProto.philote.var"#Array", true
+    }(
+        host,
+        port,
+        "/philote.ImplicitService/SolveResiduals";
         secure=secure,
         grpc=grpc,
         deadline=deadline,
@@ -293,7 +334,8 @@ end
 Create a gRPC client for the ComputeResidualGradients RPC (bidirectional streaming).
 """
 function ImplicitService_ComputeResidualGradients_Client(
-    host, port;
+    host,
+    port;
     secure=false,
     grpc=grpc_global_handle(),
     deadline=10,
@@ -301,8 +343,12 @@ function ImplicitService_ComputeResidualGradients_Client(
     max_send_message_length=4*1024*1024,
     max_recieve_message_length=4*1024*1024,
 )
-    return gRPCClient{PhiloteProto.philote.var"#Array", true, PhiloteProto.philote.var"#Array", true}(
-        host, port, "/philote.ImplicitService/ComputeResidualGradients";
+    return gRPCClient{
+        PhiloteProto.philote.var"#Array", true, PhiloteProto.philote.var"#Array", true
+    }(
+        host,
+        port,
+        "/philote.ImplicitService/ComputeResidualGradients";
         secure=secure,
         grpc=grpc,
         deadline=deadline,

@@ -79,7 +79,9 @@ function main()
         variables = get_variable_definitions!(client)
         println("✓ Variables:")
         for var in variables
-            println("  - $(var.name): shape=$(var.shape), units=$(var.units), type=$(var.type)")
+            println(
+                "  - $(var.name): shape=$(var.shape), units=$(var.units), type=$(var.type)"
+            )
         end
         println()
 
@@ -102,11 +104,7 @@ function main()
 
         for (i, case) in enumerate(test_cases)
             println("\nTest case $i: $(case.desc)")
-            inputs = Dict(
-                "a" => [case.a],
-                "b" => [case.b],
-                "c" => [case.c]
-            )
+            inputs = Dict("a" => [case.a], "b" => [case.b], "c" => [case.c])
 
             # Solve for x
             outputs = solve_residuals(client, inputs)
@@ -167,7 +165,9 @@ function main()
         println()
         println("Make sure a Philote Quadratic discipline server is running at $host:$port")
         println("Start one using:")
-        println("  philote-julia-serve examples/quadratic.jl QuadraticDiscipline --port $port")
+        println(
+            "  philote-julia-serve examples/quadratic.jl QuadraticDiscipline --port $port"
+        )
         rethrow(e)
     end
 end

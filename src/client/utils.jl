@@ -9,27 +9,29 @@ using .PhiloteProto
 Create a Philote Array message from Julia data.
 
 # Arguments
-- `name`: Variable name
-- `data`: Vector of Float64 data
-- `subname`: Optional sub-name (for partials)
-- `type`: Variable type (kInput, kOutput, kResidual, kPartial)
+
+  - `name`: Variable name
+  - `data`: Vector of Float64 data
+  - `subname`: Optional sub-name (for partials)
+  - `type`: Variable type (kInput, kOutput, kResidual, kPartial)
 
 # Returns
-- `PhiloteProto.philote.var"#Array"`: Protocol buffer array message
+
+  - `PhiloteProto.philote.var"#Array"`: Protocol buffer array message
 """
 function create_array_message(
     name::String,
     data::AbstractVector{Float64};
     subname::String="",
-    type=PhiloteProto.philote.VariableType.kInput
+    type=PhiloteProto.philote.VariableType.kInput,
 )
-    return PhiloteProto.philote.var"#Array"(
+    return PhiloteProto.philote.var"#Array"(;
         name=name,
         subname=subname,
         start=0,
         _end=length(data),
         type=type,
-        data=collect(data)
+        data=collect(data),
     )
 end
 
@@ -39,15 +41,17 @@ end
 Create a vector of Array messages from a dictionary of inputs.
 
 # Arguments
-- `inputs`: Dictionary mapping variable names to Float64 vectors
+
+  - `inputs`: Dictionary mapping variable names to Float64 vectors
 
 # Returns
-- `Vector{PhiloteProto.philote.var"#Array"}`: Vector of protocol buffer array messages
+
+  - `Vector{PhiloteProto.philote.var"#Array"}`: Vector of protocol buffer array messages
 """
 function create_input_arrays(inputs::Dict{String, <:AbstractVector{Float64}})
     return [
-        create_array_message(name, data; type=PhiloteProto.philote.VariableType.kInput)
-        for (name, data) in inputs
+        create_array_message(name, data; type=PhiloteProto.philote.VariableType.kInput) for
+        (name, data) in inputs
     ]
 end
 
@@ -57,10 +61,12 @@ end
 Parse a vector of Array messages into a dictionary.
 
 # Arguments
-- `arrays`: Vector of protocol buffer array messages
+
+  - `arrays`: Vector of protocol buffer array messages
 
 # Returns
-- `Dict{String, Vector{Float64}}`: Dictionary mapping variable names to data vectors
+
+  - `Dict{String, Vector{Float64}}`: Dictionary mapping variable names to data vectors
 """
 function parse_array_messages(arrays::Vector)
     result = Dict{String, Vector{Float64}}()
@@ -76,10 +82,12 @@ end
 Collect all Array messages from a streaming channel into a dictionary.
 
 # Arguments
-- `channel`: Channel containing Array messages
+
+  - `channel`: Channel containing Array messages
 
 # Returns
-- `Dict{String, Vector{Float64}}`: Dictionary mapping variable names to data vectors
+
+  - `Dict{String, Vector{Float64}}`: Dictionary mapping variable names to data vectors
 """
 function collect_stream_to_dict(channel::Channel)
     arrays = []
@@ -95,12 +103,14 @@ end
 Collect all metadata messages from a streaming channel.
 
 # Arguments
-- `channel`: Channel containing metadata messages (VariableMetaData or PartialsMetaData)
+
+  - `channel`: Channel containing metadata messages (VariableMetaData or PartialsMetaData)
 
 # Returns
-- `Vector{T}`: Vector of metadata messages
+
+  - `Vector{T}`: Vector of metadata messages
 """
-function collect_metadata_stream(channel::Channel{T}) where T
+function collect_metadata_stream(channel::Channel{T}) where {T}
     result = T[]
     for item in channel
         push!(result, item)
