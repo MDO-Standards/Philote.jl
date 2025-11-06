@@ -13,18 +13,19 @@ This struct contains all the common gRPC clients needed to interact with
 any Philote discipline (both explicit and implicit).
 
 # Fields
-- `host::String`: Server hostname
-- `port::Int`: Server port
-- `info_client`: gRPC client for GetInfo
-- `stream_options_client`: gRPC client for SetStreamOptions
-- `available_options_client`: gRPC client for GetAvailableOptions
-- `set_options_client`: gRPC client for SetOptions
-- `setup_client`: gRPC client for Setup
-- `variable_defs_client`: gRPC client for GetVariableDefinitions
-- `partial_defs_client`: gRPC client for GetPartialDefinitions
-- `properties::Union{Nothing, DisciplineProperties}`: Cached discipline properties
-- `variables::Union{Nothing, Vector{VariableMetaData}}`: Cached variable definitions
-- `partials::Union{Nothing, Vector{PartialsMetaData}}`: Cached partial definitions
+
+  - `host::String`: Server hostname
+  - `port::Int`: Server port
+  - `info_client`: gRPC client for GetInfo
+  - `stream_options_client`: gRPC client for SetStreamOptions
+  - `available_options_client`: gRPC client for GetAvailableOptions
+  - `set_options_client`: gRPC client for SetOptions
+  - `setup_client`: gRPC client for Setup
+  - `variable_defs_client`: gRPC client for GetVariableDefinitions
+  - `partial_defs_client`: gRPC client for GetPartialDefinitions
+  - `properties::Union{Nothing, DisciplineProperties}`: Cached discipline properties
+  - `variables::Union{Nothing, Vector{VariableMetaData}}`: Cached variable definitions
+  - `partials::Union{Nothing, Vector{PartialsMetaData}}`: Cached partial definitions
 """
 mutable struct BaseDisciplineClient
     host::String
@@ -44,7 +45,9 @@ mutable struct BaseDisciplineClient
     variables::Union{Nothing, Vector{VariableMetaData}}
     partials::Union{Nothing, Vector{PartialsMetaData}}
 
-    function BaseDisciplineClient(host::String, port::Int; secure=false, deadline=10, keepalive=60)
+    function BaseDisciplineClient(
+        host::String, port::Int; secure=false, deadline=10, keepalive=60
+    )
         # Initialize gRPC system if not already done
         try
             grpc_init()
@@ -53,19 +56,41 @@ mutable struct BaseDisciplineClient
         end
 
         # Create all the DisciplineService clients
-        info_client = DisciplineService_GetInfo_Client(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
-        stream_options_client = DisciplineService_SetStreamOptions_Client(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
-        available_options_client = DisciplineService_GetAvailableOptions_Client(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
-        set_options_client = DisciplineService_SetOptions_Client(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
-        setup_client = DisciplineService_Setup_Client(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
-        variable_defs_client = DisciplineService_GetVariableDefinitions_Client(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
-        partial_defs_client = DisciplineService_GetPartialDefinitions_Client(host, port; secure=secure, deadline=deadline, keepalive=keepalive)
+        info_client = DisciplineService_GetInfo_Client(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
+        stream_options_client = DisciplineService_SetStreamOptions_Client(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
+        available_options_client = DisciplineService_GetAvailableOptions_Client(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
+        set_options_client = DisciplineService_SetOptions_Client(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
+        setup_client = DisciplineService_Setup_Client(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
+        variable_defs_client = DisciplineService_GetVariableDefinitions_Client(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
+        partial_defs_client = DisciplineService_GetPartialDefinitions_Client(
+            host, port; secure=secure, deadline=deadline, keepalive=keepalive
+        )
 
         return new(
-            host, port,
-            info_client, stream_options_client, available_options_client,
-            set_options_client, setup_client, variable_defs_client, partial_defs_client,
-            nothing, nothing, nothing
+            host,
+            port,
+            info_client,
+            stream_options_client,
+            available_options_client,
+            set_options_client,
+            setup_client,
+            variable_defs_client,
+            partial_defs_client,
+            nothing,
+            nothing,
+            nothing,
         )
     end
 end
@@ -76,10 +101,12 @@ end
 Retrieve discipline properties from the server and cache them.
 
 # Arguments
-- `client`: Base discipline client
+
+  - `client`: Base discipline client
 
 # Returns
-- `DisciplineProperties`: Discipline properties including name, version, and capabilities
+
+  - `DisciplineProperties`: Discipline properties including name, version, and capabilities
 """
 function get_discipline_info!(client::BaseDisciplineClient)
     if isnothing(client.properties)
@@ -95,11 +122,12 @@ end
 Configure streaming options for array data transfer.
 
 # Arguments
-- `client`: Base discipline client
-- `num_double`: Maximum number of doubles per array slice (default: 10000)
+
+  - `client`: Base discipline client
+  - `num_double`: Maximum number of doubles per array slice (default: 10000)
 """
 function set_stream_options!(client::BaseDisciplineClient; num_double::Int=10000)
-    options = StreamOptions(num_double=num_double)
+    options = StreamOptions(; num_double=num_double)
     grpc_sync_request(client.stream_options_client, options)
     return nothing
 end
@@ -110,10 +138,12 @@ end
 Query the discipline for available options.
 
 # Arguments
-- `client`: Base discipline client
+
+  - `client`: Base discipline client
 
 # Returns
-- `OptionsList`: List of available option names and their types
+
+  - `OptionsList`: List of available option names and their types
 """
 function get_available_options(client::BaseDisciplineClient)
     empty_msg = Empty()
@@ -126,13 +156,14 @@ end
 Set discipline options.
 
 # Arguments
-- `client`: Base discipline client
-- `options`: Dictionary of option names to values
+
+  - `client`: Base discipline client
+  - `options`: Dictionary of option names to values
 """
 function set_options!(client::BaseDisciplineClient, options::Dict)
     # Convert options dict to protobuf Struct
     # For now, pass the dict directly - protobuf should handle conversion
-    opts = DisciplineOptions(options=options)
+    opts = DisciplineOptions(; options=options)
     grpc_sync_request(client.set_options_client, opts)
     return nothing
 end
@@ -143,7 +174,8 @@ end
 Trigger the discipline setup process on the server.
 
 # Arguments
-- `client`: Base discipline client
+
+  - `client`: Base discipline client
 """
 function setup!(client::BaseDisciplineClient)
     empty_msg = Empty()
@@ -157,10 +189,12 @@ end
 Retrieve variable definitions from the server (streaming RPC) and cache them.
 
 # Arguments
-- `client`: Base discipline client
+
+  - `client`: Base discipline client
 
 # Returns
-- `Vector{VariableMetaData}`: Vector of variable metadata
+
+  - `Vector{VariableMetaData}`: Vector of variable metadata
 """
 function get_variable_definitions!(client::BaseDisciplineClient)
     if isnothing(client.variables)
@@ -185,10 +219,12 @@ end
 Retrieve partial derivative definitions from the server (streaming RPC) and cache them.
 
 # Arguments
-- `client`: Base discipline client
+
+  - `client`: Base discipline client
 
 # Returns
-- `Vector{PartialsMetaData}`: Vector of partial derivative metadata
+
+  - `Vector{PartialsMetaData}`: Vector of partial derivative metadata
 """
 function get_partial_definitions!(client::BaseDisciplineClient)
     if isnothing(client.partials)

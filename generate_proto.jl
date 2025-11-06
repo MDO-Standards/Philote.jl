@@ -11,14 +11,14 @@ ProtoBuf.protojl(
     ["data.proto"],  # relative to proto_dir
     [proto_dir],     # search directory
     output_dir;      # output directory
-    add_kwarg_constructors=true
+    add_kwarg_constructors=true,
 )
 
 ProtoBuf.protojl(
     ["disciplines.proto"],  # relative to proto_dir
     [proto_dir],            # search directory
     output_dir;             # output directory
-    add_kwarg_constructors=true
+    add_kwarg_constructors=true,
 )
 
 println("Protocol buffer files generated successfully!")

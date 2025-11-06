@@ -7,7 +7,6 @@ using ProtoBuf.EnumX: @enumx
 
 export Empty
 
-
 struct Empty end
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:Empty})

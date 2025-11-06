@@ -14,20 +14,14 @@ jobs:
     uses: ./.github/workflows/lint.yml
 
   build-and-test:
-    name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }}
+    name: Julia ${{ matrix.julia-version }}
     needs: lint
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         julia-version:
-          - '1.6'   # LTS
-          - '1.9'   # Previous stable
-          - '1'     # Latest stable
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
+          - '1.12'
 
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +42,14 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
+
+      - name: Install unregistered dependencies
+        run: |
+          julia --project=@. -e '
+            using Pkg
+            Pkg.Registry.add("General")
+            Pkg.add(url="https://github.com/csvance/gRPCClient2.jl")
+          '
 
       - name: Build package
         uses: julia-actions/julia-buildpkg@v1

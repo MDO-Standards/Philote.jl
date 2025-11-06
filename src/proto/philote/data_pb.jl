@@ -8,15 +8,14 @@ using ProtoBuf.EnumX: @enumx
 export var"#DataType", StreamOptions, PartialsMetaData, VariableType, DisciplineOptions
 export DisciplineProperties, OptionsList, var"#Array", VariableMetaData
 
-
 @enumx var"#DataType" kBool=0 kInt=1 kDouble=2 kString=3
 
 struct StreamOptions
     num_double::Int64
 end
-StreamOptions(;num_double = zero(Int64)) = StreamOptions(num_double)
-PB.default_values(::Type{StreamOptions}) = (;num_double = zero(Int64))
-PB.field_numbers(::Type{StreamOptions}) = (;num_double = 1)
+StreamOptions(; num_double=zero(Int64)) = StreamOptions(num_double)
+PB.default_values(::Type{StreamOptions}) = (; num_double=zero(Int64))
+PB.field_numbers(::Type{StreamOptions}) = (; num_double=1)
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:StreamOptions})
     num_double = zero(Int64)
@@ -47,9 +46,11 @@ struct PartialsMetaData
     subname::String
     shape::Vector{Int64}
 end
-PartialsMetaData(;name = "", subname = "", shape = Vector{Int64}()) = PartialsMetaData(name, subname, shape)
-PB.default_values(::Type{PartialsMetaData}) = (;name = "", subname = "", shape = Vector{Int64}())
-PB.field_numbers(::Type{PartialsMetaData}) = (;name = 1, subname = 2, shape = 3)
+function PartialsMetaData(; name="", subname="", shape=Vector{Int64}())
+    PartialsMetaData(name, subname, shape)
+end
+PB.default_values(::Type{PartialsMetaData}) = (; name="", subname="", shape=Vector{Int64}())
+PB.field_numbers(::Type{PartialsMetaData}) = (; name=1, subname=2, shape=3)
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:PartialsMetaData})
     name = ""
@@ -88,14 +89,14 @@ end
 @enumx VariableType kInput=0 kDiscreteInput=1 kResidual=2 kOutput=3 kDiscreteOutput=4 kPartial=5
 
 struct DisciplineOptions
-    options::Union{Nothing,google.protobuf.Struct}
+    options::Union{Nothing, google.protobuf.Struct}
 end
-DisciplineOptions(;options = nothing) = DisciplineOptions(options)
-PB.default_values(::Type{DisciplineOptions}) = (;options = nothing)
-PB.field_numbers(::Type{DisciplineOptions}) = (;options = 1)
+DisciplineOptions(; options=nothing) = DisciplineOptions(options)
+PB.default_values(::Type{DisciplineOptions}) = (; options=nothing)
+PB.field_numbers(::Type{DisciplineOptions}) = (; options=1)
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:DisciplineOptions})
-    options = Ref{Union{Nothing,google.protobuf.Struct}}(nothing)
+    options = Ref{Union{Nothing, google.protobuf.Struct}}(nothing)
     while !PB.message_done(d)
         field_number, wire_type = PB.decode_tag(d)
         if field_number == 1
@@ -125,9 +126,23 @@ struct DisciplineProperties
     name::String
     version::String
 end
-DisciplineProperties(;continuous = false, differentiable = false, provides_gradients = false, name = "", version = "") = DisciplineProperties(continuous, differentiable, provides_gradients, name, version)
-PB.default_values(::Type{DisciplineProperties}) = (;continuous = false, differentiable = false, provides_gradients = false, name = "", version = "")
-PB.field_numbers(::Type{DisciplineProperties}) = (;continuous = 1, differentiable = 2, provides_gradients = 3, name = 4, version = 5)
+function DisciplineProperties(;
+    continuous=false, differentiable=false, provides_gradients=false, name="", version=""
+)
+    DisciplineProperties(continuous, differentiable, provides_gradients, name, version)
+end
+function PB.default_values(::Type{DisciplineProperties})
+    (;
+        continuous=false,
+        differentiable=false,
+        provides_gradients=false,
+        name="",
+        version="",
+    )
+end
+function PB.field_numbers(::Type{DisciplineProperties})
+    (; continuous=1, differentiable=2, provides_gradients=3, name=4, version=5)
+end
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:DisciplineProperties})
     continuous = false
@@ -151,7 +166,9 @@ function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:DisciplineProperties})
             Base.skip(d, wire_type)
         end
     end
-    return DisciplineProperties(continuous, differentiable, provides_gradients, name, version)
+    return DisciplineProperties(
+        continuous, differentiable, provides_gradients, name, version
+    )
 end
 
 function PB.encode(e::PB.AbstractProtoEncoder, x::DisciplineProperties)
@@ -167,7 +184,8 @@ function PB._encoded_size(x::DisciplineProperties)
     encoded_size = 0
     x.continuous != false && (encoded_size += PB._encoded_size(x.continuous, 1))
     x.differentiable != false && (encoded_size += PB._encoded_size(x.differentiable, 2))
-    x.provides_gradients != false && (encoded_size += PB._encoded_size(x.provides_gradients, 3))
+    x.provides_gradients != false &&
+        (encoded_size += PB._encoded_size(x.provides_gradients, 3))
     !isempty(x.name) && (encoded_size += PB._encoded_size(x.name, 4))
     !isempty(x.version) && (encoded_size += PB._encoded_size(x.version, 5))
     return encoded_size
@@ -177,9 +195,13 @@ struct OptionsList
     options::Vector{String}
     var"#type"::Vector{var"#DataType".T}
 end
-OptionsList(;options = Vector{String}(), var"#type" = Vector{var"#DataType".T}()) = OptionsList(options, var"#type")
-PB.default_values(::Type{OptionsList}) = (;options = Vector{String}(), var"#type" = Vector{var"#DataType".T}())
-PB.field_numbers(::Type{OptionsList}) = (;options = 1, var"#type" = 2)
+function OptionsList(; options=Vector{String}(), var"#type"=Vector{var"#DataType".T}())
+    OptionsList(options, var"#type")
+end
+function PB.default_values(::Type{OptionsList})
+    (; options=Vector{String}(), var"#type"=Vector{var"#DataType".T}())
+end
+PB.field_numbers(::Type{OptionsList}) = (; options=1, var"#type"=2)
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:OptionsList})
     options = PB.BufferedVector{String}()
@@ -218,9 +240,29 @@ struct var"#Array"
     var"#type"::VariableType.T
     data::Vector{Float64}
 end
-var"#Array"(;name = "", subname = "", start = zero(Int64), var"#end" = zero(Int64), var"#type" = VariableType.kInput, data = Vector{Float64}()) = var"#Array"(name, subname, start, var"#end", var"#type", data)
-PB.default_values(::Type{var"#Array"}) = (;name = "", subname = "", start = zero(Int64), var"#end" = zero(Int64), var"#type" = VariableType.kInput, data = Vector{Float64}())
-PB.field_numbers(::Type{var"#Array"}) = (;name = 1, subname = 2, start = 3, var"#end" = 4, var"#type" = 5, data = 6)
+function var"#Array"(;
+    name="",
+    subname="",
+    start=zero(Int64),
+    var"#end"=zero(Int64),
+    var"#type"=VariableType.kInput,
+    data=Vector{Float64}(),
+)
+    var"#Array"(name, subname, start, var"#end", var"#type", data)
+end
+function PB.default_values(::Type{var"#Array"})
+    (;
+        name="",
+        subname="",
+        start=zero(Int64),
+        var"#end"=zero(Int64),
+        var"#type"=VariableType.kInput,
+        data=Vector{Float64}(),
+    )
+end
+function PB.field_numbers(::Type{var"#Array"})
+    (; name=1, subname=2, start=3, var"#end"=4, var"#type"=5, data=6)
+end
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:var"#Array"})
     name = ""
@@ -266,7 +308,8 @@ function PB._encoded_size(x::var"#Array")
     !isempty(x.subname) && (encoded_size += PB._encoded_size(x.subname, 2))
     x.start != zero(Int64) && (encoded_size += PB._encoded_size(x.start, 3))
     x.var"#end" != zero(Int64) && (encoded_size += PB._encoded_size(x.var"#end", 4))
-    x.var"#type" != VariableType.kInput && (encoded_size += PB._encoded_size(x.var"#type", 5))
+    x.var"#type" != VariableType.kInput &&
+        (encoded_size += PB._encoded_size(x.var"#type", 5))
     !isempty(x.data) && (encoded_size += PB._encoded_size(x.data, 6))
     return encoded_size
 end
@@ -277,9 +320,15 @@ struct VariableMetaData
     shape::Vector{Int64}
     units::String
 end
-VariableMetaData(;var"#type" = VariableType.kInput, name = "", shape = Vector{Int64}(), units = "") = VariableMetaData(var"#type", name, shape, units)
-PB.default_values(::Type{VariableMetaData}) = (;var"#type" = VariableType.kInput, name = "", shape = Vector{Int64}(), units = "")
-PB.field_numbers(::Type{VariableMetaData}) = (;var"#type" = 1, name = 3, shape = 4, units = 5)
+function VariableMetaData(;
+    var"#type"=VariableType.kInput, name="", shape=Vector{Int64}(), units=""
+)
+    VariableMetaData(var"#type", name, shape, units)
+end
+function PB.default_values(::Type{VariableMetaData})
+    (; var"#type"=VariableType.kInput, name="", shape=Vector{Int64}(), units="")
+end
+PB.field_numbers(::Type{VariableMetaData}) = (; var"#type"=1, name=3, shape=4, units=5)
 
 function PB.decode(d::PB.AbstractProtoDecoder, ::Type{<:VariableMetaData})
     var"#type" = VariableType.kInput
@@ -313,7 +362,8 @@ function PB.encode(e::PB.AbstractProtoEncoder, x::VariableMetaData)
 end
 function PB._encoded_size(x::VariableMetaData)
     encoded_size = 0
-    x.var"#type" != VariableType.kInput && (encoded_size += PB._encoded_size(x.var"#type", 1))
+    x.var"#type" != VariableType.kInput &&
+        (encoded_size += PB._encoded_size(x.var"#type", 1))
     !isempty(x.name) && (encoded_size += PB._encoded_size(x.name, 3))
     !isempty(x.shape) && (encoded_size += PB._encoded_size(x.shape, 4))
     !isempty(x.units) && (encoded_size += PB._encoded_size(x.units, 5))

@@ -5,8 +5,6 @@ import ProtoBuf as PB
 using ProtoBuf: OneOf
 using ProtoBuf.EnumX: @enumx
 
-
-
 # TODO: SERVICE
 #    ImplicitService
 
