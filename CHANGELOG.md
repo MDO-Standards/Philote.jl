@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-11-06
+
 ### Added
 - Native Julia gRPC clients for connecting to Philote discipline servers
 - `ExplicitClient` for explicit disciplines (outputs = f(inputs))
@@ -42,4 +44,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI/CD workflows for linting, testing, and coverage
 - Integration with Philote-Python via juliacall
 
-[Unreleased]: https://github.com/MDO-Standards/Philote-Julia/compare/v0.0.0...HEAD
+[Unreleased]: https://github.com/MDO-Standards/Philote-Julia/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/MDO-Standards/Philote-Julia/compare/v0.0.0...v0.1.0
